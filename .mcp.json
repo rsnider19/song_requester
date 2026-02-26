@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "ios-simulator": {
+      "command": "npx",
+      "args": ["-y", "ios-simulator-mcp"]
+    },
+    "dart-mcp-server": {
+      "command": "dart",
+      "args": ["mcp-server"]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "http://localhost:54331/mcp?features=docs%2Cdatabase%2Cdebugging%2Cdevelopment"
+    }
+  }
+}
