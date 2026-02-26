@@ -65,29 +65,6 @@
 
 ### Item 3: Performer Opt-in Flow (Milestone 1)
 
-**Summary:** Remove counter boilerplate, define the full navigation shell for both Audience and Performer modes, add route guards for performer-only screens, and wire up the mode toggle on the Profile/Settings screen.
-
-**Spec:** `docs/specs/02-app-modes.md`
-
-**Key files:**
-
-- `lib/app/router/app_router.dart`
-- `lib/features/auth/` (auth guards)
-- `lib/widgets/app_scaffold.dart`
-
-**Exit criteria:**
-
-- [ ] Counter feature removed
-- [ ] Audience mode shell: home, search, profile routes defined
-- [ ] Performer mode shell: home, profile, gig management routes defined
-- [ ] Performer-only routes guarded — redirects non-performers to audience home
-- [ ] Mode toggle visible on Profile/Settings screen for opted-in performers
-- [ ] Switching modes reloads the correct navigation structure
-
----
-
-### Item 3: Performer Opt-in Flow (Milestone 1)
-
 **Summary:** Build the self-serve performer opt-in flow, reachable from the "Become a Performer" CTA (deferred to audience home screen item) and Settings. Updates the user's `isPerformer` flag and presents Stripe onboarding as an optional next step (Stripe integration comes in a later item).
 
 **Spec:** `docs/specs/01-auth.md` (performer opt-in section)
