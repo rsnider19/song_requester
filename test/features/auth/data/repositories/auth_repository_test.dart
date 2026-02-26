@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logger/logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:song_requester/features/auth/data/repositories/auth_repository.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
+import 'package:song_requester/services/logging_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ class _MockSupabaseClient extends Mock implements SupabaseClient {}
 
 class _MockGoTrueClient extends Mock implements GoTrueClient {}
 
-class _MockLogger extends Mock implements Logger {}
+class _MockLoggingService extends Mock implements LoggingService {}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -22,13 +22,13 @@ class _MockLogger extends Mock implements Logger {}
 void main() {
   late _MockSupabaseClient supabase;
   late _MockGoTrueClient auth;
-  late _MockLogger logger;
+  late _MockLoggingService logger;
   late AuthRepository repository;
 
   setUp(() {
     supabase = _MockSupabaseClient();
     auth = _MockGoTrueClient();
-    logger = _MockLogger();
+    logger = _MockLoggingService();
     repository = AuthRepository(supabase, logger);
     when(() => supabase.auth).thenReturn(auth);
   });

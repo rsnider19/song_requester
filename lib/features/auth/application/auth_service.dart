@@ -1,9 +1,8 @@
-import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:song_requester/app/providers/logger_provider.dart';
 import 'package:song_requester/features/auth/data/repositories/auth_repository.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
+import 'package:song_requester/services/logging_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_service.g.dart';
@@ -12,7 +11,7 @@ class AuthService {
   AuthService(this._repository, this._logger);
 
   final AuthRepository _repository;
-  final Logger _logger;
+  final LoggingService _logger;
 
   /// Returns the currently authenticated [User], or null if no session exists.
   User? get currentUser => _repository.currentUser;
@@ -52,5 +51,5 @@ class AuthService {
 @Riverpod(keepAlive: true)
 AuthService authService(Ref ref) => AuthService(
   ref.watch(authRepositoryProvider),
-  ref.watch(loggerProvider),
+  ref.watch(loggingServiceProvider),
 );

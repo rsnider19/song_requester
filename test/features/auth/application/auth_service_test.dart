@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logger/logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:song_requester/features/auth/application/auth_service.dart';
 import 'package:song_requester/features/auth/data/repositories/auth_repository.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
+import 'package:song_requester/services/logging_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ---------------------------------------------------------------------------
@@ -15,7 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
-class _MockLogger extends Mock implements Logger {}
+class _MockLoggingService extends Mock implements LoggingService {}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -23,14 +23,14 @@ class _MockLogger extends Mock implements Logger {}
 
 void main() {
   late _MockAuthRepository repository;
-  late _MockLogger logger;
+  late _MockLoggingService logger;
   late AuthService service;
 
   const guestProfile = UserProfile(id: 'guest-id', isAnonymous: true, isPerformer: false);
 
   setUp(() {
     repository = _MockAuthRepository();
-    logger = _MockLogger();
+    logger = _MockLoggingService();
     service = AuthService(repository, logger);
   });
 
