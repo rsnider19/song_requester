@@ -11,28 +11,7 @@
 
 ## In Progress
 
-### Item 1: Auth & Account Creation (Milestone 1)
-
-**Summary:** Set up Supabase client, implement Google Sign-In and Apple Sign-In, wire up Supabase anonymous auth for guest users, create the User domain model with performer flag, and establish auth state providers and route guards.
-
-**Spec:** `docs/specs/01-auth.md`
-
-**Key files:**
-
-- `lib/features/auth/` (new feature directory)
-- `lib/app/router/app_router.dart` (add auth guard)
-- `supabase/schema.ts` (reference for user/profile table)
-- `env/.env.development` (Supabase + OAuth credentials)
-
-**Exit criteria:**
-
-- [ ] Guest users get a silent anonymous Supabase session on first open
-- [ ] Google Sign-In and Apple Sign-In work and upgrade the anonymous session
-- [ ] `UserProfile` Freezed model with `id`, `email`, `isPerformer` flag
-- [ ] `authStateProvider` exposes current user (guest, authenticated, or unauthenticated)
-- [ ] Route guard redirects unauthenticated users away from protected routes
-- [ ] Sign-in screen renders with Google and Apple buttons (shadcn_ui)
-- [ ] Unit tests for auth service and repository
+_(none)_
 
 ---
 
@@ -351,4 +330,8 @@
 
 ## Done
 
-_(none yet)_
+### Item 1: Auth & Account Creation (Milestone 1)
+
+**Summary:** Set up Supabase client, implement Google Sign-In and Apple Sign-In, wire up Supabase anonymous auth for guest users, create the User domain model with performer flag, and establish auth state providers and route guards.
+
+**Spec:** `docs/specs/01-auth.md`
