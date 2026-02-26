@@ -128,6 +128,17 @@ Each flavor has its own entry point (`lib/main_*.dart`) that passes the env path
 - `lib/gen/` - Generated asset references
 - `supabase/schema.ts` - Generated database types (reference for table structures)
 
+## Definition of Done
+
+Work is **not complete** until both linters pass with zero issues (errors, warnings, and infos):
+
+```bash
+fvm flutter analyze
+fvm dart run custom_lint
+```
+
+Always run both before declaring any task finished. Fix all reported issues — do not suppress or ignore them unless there is a documented reason.
+
 ## Code Styles
 
 ### Dart
@@ -268,7 +279,8 @@ Write unit tests for repositories (mock Supabase client), services (mock reposit
 
 ### UI/UX
 
-- Material Design 3, dark mode support
+- **EXCLUSIVELY use `shadcn_ui` package for all widgets.** Do not use raw Material or Cupertino widgets directly.
+- If no `shadcn_ui` widget exists for a use case, create a custom widget in `lib/widgets/` — this directory is for **app-level shareable widgets only**.
 - Loading (shimmer/progress), error (retry button), empty states (CTA)
 - Confirmation dialogs for destructive actions
 - Accessibility: semantic labels, contrast, 48x48dp touch targets
