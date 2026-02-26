@@ -48,6 +48,21 @@ fvm dart run custom_lint
 - **Supabase** for backend (auth, database via PostgREST, storage, edge functions)
 - **Drift** for local SQLite caching and offline support
 
+### Approved Package List
+
+Use these packages when their use case arises. Do not reach for alternatives.
+
+| Package | Use case |
+|---------|----------|
+| `cached_network_image` | All remote image loading |
+| `dartx` | Extended Dart iterables/collections utilities |
+| `flutter_secure_storage` | Storing sensitive values (tokens, keys) |
+| `gap` | Spacing in `Row`/`Column`/`Flex` — use instead of `SizedBox` for gaps |
+| `permission_handler` | Runtime permission requests (location, camera, etc.) |
+| `recase` | String case conversion (camelCase, snake_case, etc.) |
+| `sliver_tools` | Advanced sliver layouts in custom scroll views |
+| `uuid` | Generating UUIDs client-side |
+
 ### Supabase & PostgREST
 
 Data fetching uses Supabase's PostgREST client (`supabase_flutter`). Key patterns:
@@ -82,6 +97,34 @@ await supabase
 // RPC (stored procedures)
 final response = await supabase.rpc('function_name', params: {'param': value});
 ```
+
+### Supabase Migrations
+
+**Always use fully qualified names** for all identifiers in migration files — `public.profiles`, `auth.users`, never bare names that rely on `search_path`.
+
+**RLS policies must follow these performance conventions on every policy:**
+
+```sql
+-- ✅ CORRECT
+create policy "Users can view own profile"
+  on public.profiles
+  for select
+  to authenticated                          -- always specify role
+  using ((select auth.uid()) = id);         -- wrap in (select ...) for initPlan cache
+
+-- ❌ WRONG
+create policy "Users can view own profile"
+  on public.profiles
+  using (auth.uid() = id);                  -- missing role, unwrapped auth.uid()
+```
+
+- Wrap `auth.uid()` as `(select auth.uid())` — caches result per-statement, not per-row (~95% perf improvement)
+- Always specify `to authenticated` (or `to anon`) — prevents evaluation for irrelevant roles
+- `UPDATE` policies require both `using` and `with check`
+- Index all columns referenced in policy conditions
+- All functions: use `security definer set search_path = ''` to enforce fully qualified names inside the body
+
+Reference: [Supabase RLS best practices](https://supabase.com/docs/guides/database/postgres/row-level-security)
 
 ### Database Schema
 
