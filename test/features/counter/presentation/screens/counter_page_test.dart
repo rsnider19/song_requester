@@ -1,9 +1,9 @@
 // Ignore for testing purposes
 // ignore_for_file: prefer_const_constructors
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:song_requester/features/counter/counter.dart';
 import 'package:song_requester/l10n/l10n.dart';
 
@@ -46,7 +46,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: ShadApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: CounterView(),
@@ -54,7 +54,7 @@ void main() {
         ),
       );
       expect(container.read(counterStateProvider), 0);
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(LucideIcons.plus));
       expect(container.read(counterStateProvider), 1);
     });
 
@@ -66,7 +66,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: ShadApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: CounterView(),
@@ -74,7 +74,7 @@ void main() {
         ),
       );
       expect(container.read(counterStateProvider), 0);
-      await tester.tap(find.byIcon(Icons.remove));
+      await tester.tap(find.byIcon(LucideIcons.minus));
       expect(container.read(counterStateProvider), -1);
     });
   });

@@ -34,7 +34,7 @@ fvm dart run build_runner serve --delete-conflicting-outputs
 
 # Analyze code
 fvm flutter analyze
-fvm dart run custom_lint
+fvm dart run custom_lint  # NOTE: currently broken — see Known Tooling Issues below
 ```
 
 ## Architecture
@@ -98,24 +98,34 @@ await supabase
 final response = await supabase.rpc('function_name', params: {'param': value});
 ```
 
+### Database Conventions
+
+- **Table names are singular**: `public.profile`, `public.gig`, never `public.profiles`
+- **Primary keys**: always `<table_name>_id uuid` (e.g., `profile_id uuid primary key`)
+- **Foreign keys**: always indexed — create an explicit index after every FK declaration
+- **Views**: always defined with `with (security_invoker = true)` so RLS applies to the caller
+- **Prefer views over functions** for data access patterns
+- **Always check indexes** when building views or PostgREST queries (index all join/filter columns)
+- **`search_path = ''`**: required on all functions and `security definer` clauses
+
 ### Supabase Migrations
 
-**Always use fully qualified names** for all identifiers in migration files — `public.profiles`, `auth.users`, never bare names that rely on `search_path`.
+**Always use fully qualified names** for all identifiers in migration files — `public.profile`, `auth.users`, never bare names that rely on `search_path`.
 
 **RLS policies must follow these performance conventions on every policy:**
 
 ```sql
 -- ✅ CORRECT
 create policy "Users can view own profile"
-  on public.profiles
+  on public.profile
   for select
-  to authenticated                          -- always specify role
-  using ((select auth.uid()) = id);         -- wrap in (select ...) for initPlan cache
+  to authenticated                               -- always specify role
+  using ((select auth.uid()) = profile_id);      -- wrap in (select ...) for initPlan cache
 
 -- ❌ WRONG
 create policy "Users can view own profile"
-  on public.profiles
-  using (auth.uid() = id);                  -- missing role, unwrapped auth.uid()
+  on public.profile
+  using (auth.uid() = profile_id);              -- missing role, unwrapped auth.uid()
 ```
 
 - Wrap `auth.uid()` as `(select auth.uid())` — caches result per-statement, not per-row (~95% perf improvement)
@@ -181,6 +191,8 @@ fvm dart run custom_lint
 ```
 
 Always run both before declaring any task finished. Fix all reported issues — do not suppress or ignore them unless there is a documented reason.
+
+**Known Tooling Issue**: `fvm dart run custom_lint` currently fails to build because `custom_lint 0.8.1` requires `analyzer ^8.0.0` (which exports `element2.dart`), but the project pins `analyzer: ^10.0.0` (which removed that file). This is a pre-existing conflict — no single analyzer version satisfies all packages simultaneously. Until `custom_lint` publishes a version supporting `analyzer 10.x`, treat `fvm flutter analyze` as the sole static analysis gate.
 
 ## Code Styles
 

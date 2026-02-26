@@ -115,3 +115,6 @@ app.*.map.json
 
 # Generated l10n files
 lib/l10n/gen/
+
+# Environment files (contain secrets — never commit)
+env/
