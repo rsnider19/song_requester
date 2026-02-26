@@ -15,7 +15,7 @@ _(none)_
 
 ---
 
-## Next
+## In Progress
 
 ### Item 2: App Shell & Navigation (Milestone 1)
 
@@ -40,7 +40,7 @@ _(none)_
 
 ---
 
-## Upcoming
+## Next
 
 ### Item 3: Performer Opt-in Flow (Milestone 1)
 
@@ -62,6 +62,8 @@ _(none)_
 - [ ] Skipping Stripe still completes opt-in successfully
 
 ---
+
+## Upcoming
 
 ### Item 4: Song Management (Milestone 2)
 
