@@ -14,27 +14,27 @@ Migration files must use **fully qualified names** for all references.
 RLS policies must follow [Supabase RLS best practices](https://supabase.com/docs/guides/database/postgres/row-level-security) — see performance conventions below.
 
 ```sql
-create table public.profiles (
-  id uuid references auth.users(id) on delete cascade primary key,
+create table public.profile (
+  profile_id uuid references auth.users(id) on delete cascade primary key,
   email text,
   is_performer boolean not null default false,
   created_at timestamptz not null default now()
 );
 
-alter table public.profiles enable row level security;
+alter table public.profile enable row level security;
 
 create policy "Users can view own profile"
-  on public.profiles
+  on public.profile
   for select
   to authenticated
-  using ((select auth.uid()) = id);
+  using ((select auth.uid()) = profile_id);
 
 create policy "Users can update own profile"
-  on public.profiles
+  on public.profile
   for update
   to authenticated
-  using ((select auth.uid()) = id)
-  with check ((select auth.uid()) = id);
+  using ((select auth.uid()) = profile_id)
+  with check ((select auth.uid()) = profile_id);
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -42,7 +42,7 @@ language plpgsql
 security definer set search_path = ''
 as $$
 begin
-  insert into public.profiles (id, email)
+  insert into public.profile (profile_id, email)
   values (new.id, new.email);
   return new;
 end;

@@ -3,6 +3,8 @@ import 'dart:developer';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:song_requester/services/dot_env_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final class AppProviderObserver extends ProviderObserver {
   const AppProviderObserver();
@@ -26,12 +28,33 @@ final class AppProviderObserver extends ProviderObserver {
   }
 }
 
-Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
+Future<void> bootstrap(
+  FutureOr<Widget> Function() builder, {
+  required String envPath,
+}) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);
   };
 
-  // Add cross-flavor configuration here
+  final env = await DotEnvService.load(envPath);
+
+  await Supabase.initialize(
+    url: env.supabaseUrl,
+    anonKey: env.supabaseAnonKey,
+  );
+
+  // Ensure every user has a persistent identity from first open.
+  // signInAnonymously is a no-op if a session already exists.
+  final client = Supabase.instance.client;
+  if (client.auth.currentUser == null) {
+    try {
+      await client.auth.signInAnonymously();
+    } on Exception catch (e, st) {
+      log('Anonymous sign-in failed — app will continue without a session', error: e, stackTrace: st);
+    }
+  }
 
   runApp(
     ProviderScope(

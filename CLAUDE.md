@@ -34,7 +34,7 @@ fvm dart run build_runner serve --delete-conflicting-outputs
 
 # Analyze code
 fvm flutter analyze
-fvm dart run custom_lint
+fvm dart run custom_lint  # NOTE: currently broken — see Known Tooling Issues below
 ```
 
 ## Architecture
@@ -45,6 +45,16 @@ fvm dart run custom_lint
   - Always use `riverpod_generator` to generate providers and notifiers.
   - Use `@Riverpod(keepAlive: true)` for app-wide providers. Omit for screen-scoped providers.
   - Notifier class names follow the pattern `<ClassName>StateNotifier`.
+  - **Stream subscriptions in `build()`**: Never store a `StreamSubscription` as a class field. Use a local variable in `build()` and register cleanup with `ref.onDispose`. Riverpod calls `onDispose` before each rebuild, so cancellation is automatic.
+    ```dart
+    @override
+    UserProfile? build() {
+      final sub = service.watchSomething().listen((value) { state = value; });
+      ref.onDispose(() => unawaited(sub.cancel()));
+      return null;
+    }
+    ```
+    This avoids both the `cancel_subscriptions` and `discarded_futures` lint errors.
 - **Supabase** for backend (auth, database via PostgREST, storage, edge functions)
 - **Drift** for local SQLite caching and offline support
 
@@ -98,24 +108,34 @@ await supabase
 final response = await supabase.rpc('function_name', params: {'param': value});
 ```
 
+### Database Conventions
+
+- **Table names are singular**: `public.profile`, `public.gig`, never `public.profiles`
+- **Primary keys**: always `<table_name>_id uuid` (e.g., `profile_id uuid primary key`)
+- **Foreign keys**: always indexed — create an explicit index after every FK declaration
+- **Views**: always defined with `with (security_invoker = true)` so RLS applies to the caller
+- **Prefer views over functions** for data access patterns
+- **Always check indexes** when building views or PostgREST queries (index all join/filter columns)
+- **`search_path = ''`**: required on all functions and `security definer` clauses
+
 ### Supabase Migrations
 
-**Always use fully qualified names** for all identifiers in migration files — `public.profiles`, `auth.users`, never bare names that rely on `search_path`.
+**Always use fully qualified names** for all identifiers in migration files — `public.profile`, `auth.users`, never bare names that rely on `search_path`.
 
 **RLS policies must follow these performance conventions on every policy:**
 
 ```sql
 -- ✅ CORRECT
 create policy "Users can view own profile"
-  on public.profiles
+  on public.profile
   for select
-  to authenticated                          -- always specify role
-  using ((select auth.uid()) = id);         -- wrap in (select ...) for initPlan cache
+  to authenticated                               -- always specify role
+  using ((select auth.uid()) = profile_id);      -- wrap in (select ...) for initPlan cache
 
 -- ❌ WRONG
 create policy "Users can view own profile"
-  on public.profiles
-  using (auth.uid() = id);                  -- missing role, unwrapped auth.uid()
+  on public.profile
+  using (auth.uid() = profile_id);              -- missing role, unwrapped auth.uid()
 ```
 
 - Wrap `auth.uid()` as `(select auth.uid())` — caches result per-statement, not per-row (~95% perf improvement)
@@ -182,6 +202,8 @@ fvm dart run custom_lint
 
 Always run both before declaring any task finished. Fix all reported issues — do not suppress or ignore them unless there is a documented reason.
 
+**Known Tooling Issue**: `fvm dart run custom_lint` currently fails to build because `custom_lint 0.8.1` requires `analyzer ^8.0.0` (which exports `element2.dart`), but the project pins `analyzer: ^10.0.0` (which removed that file). This is a pre-existing conflict — no single analyzer version satisfies all packages simultaneously. Until `custom_lint` publishes a version supporting `analyzer 10.x`, treat `fvm flutter analyze` as the sole static analysis gate.
+
 ## Code Styles
 
 ### Dart
@@ -190,6 +212,28 @@ Always run both before declaring any task finished. Fix all reported issues — 
 - Page width: 120 characters
 - Trailing commas: preserved
 - Generated files are excluded from analysis
+- **`const` ternaries**: When all branches of a ternary are compile-time constants, declare the result `const` not `final`. The `prefer_const_declarations` lint enforces this.
+  ```dart
+  // ✅ CORRECT
+  const level = kDebugMode ? Level.debug : kReleaseMode ? Level.warning : Level.info;
+  // ❌ WRONG
+  final level = kDebugMode ? Level.debug : kReleaseMode ? Level.warning : Level.info;
+  ```
+- **Single-method abstracts**: The `one_member_abstracts` lint forbids single-method abstract classes. Use a `typedef` instead.
+  ```dart
+  // ✅ CORRECT — typedef for callback injection
+  typedef ErrorReporter = void Function(dynamic message, {Object? error, StackTrace? stackTrace});
+  // ❌ WRONG — triggers one_member_abstracts
+  abstract interface class ErrorReporter { void report(dynamic message, ...); }
+  ```
+  In tests, replace `Mock implements SomeTypedef` (invalid) with a capturing lambda:
+  ```dart
+  late List<dynamic> reporterCalls;
+  setUp(() {
+    reporterCalls = [];
+    service = MyService(reporter: (msg, {error, stackTrace}) => reporterCalls.add(msg));
+  });
+  ```
 
 ### Git
 
@@ -238,7 +282,7 @@ abstract class Item with _$Item {
 class ItemRepository {
   ItemRepository(this._supabase, this._logger);
   final SupabaseClient _supabase;
-  final Logger _logger;
+  final LoggingService _logger;
 
   Future<Item> getById(String id) async {
     try {
@@ -265,8 +309,8 @@ class ItemRepository {
 }
 
 @Riverpod(keepAlive: true)
-ItemRepository itemRepository(ItemRepositoryRef ref) =>
-    ItemRepository(ref.watch(supabaseProvider), ref.watch(loggerProvider));
+ItemRepository itemRepository(Ref ref) =>
+    ItemRepository(ref.watch(supabaseProvider), ref.watch(loggingServiceProvider));
 ```
 
 ### Service Pattern
@@ -277,7 +321,7 @@ Business logic layer: validate input, coordinate repositories/providers, enrich 
 class ItemService {
   ItemService(this._repository, this._logger);
   final ItemRepository _repository;
-  final Logger _logger;
+  final LoggingService _logger;
 
   Future<Item> create({required String userId, String? notes}) async {
     if (userId.isEmpty) throw ValidationException('User required');
@@ -288,8 +332,8 @@ class ItemService {
 }
 
 @Riverpod(keepAlive: true)
-ItemService itemService(ItemServiceRef ref) =>
-    ItemService(ref.watch(itemRepositoryProvider), ref.watch(loggerProvider));
+ItemService itemService(Ref ref) =>
+    ItemService(ref.watch(itemRepositoryProvider), ref.watch(loggingServiceProvider));
 ```
 
 ### Exception Handling
