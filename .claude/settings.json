@@ -1,0 +1,67 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose:*)",
+      "Bash(fvm dart:*)",
+      "Bash(fvm flutter:*)",
+      "Bash(very_good test:*)",
+      "mcp__ios-simulator__screenshot",
+      "mcp__ios-simulator__ui_describe_all",
+      "mcp__ios-simulator__ui_tap",
+      "mcp__ios-simulator__ui_swipe",
+      "mcp__ios-simulator__ui_type",
+      "mcp__ios-simulator__launch_app",
+      "mcp__ios-simulator__ui_describe_point"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/scripts/install-dart-fvm.sh",
+            "timeout": 300,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-generated.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-env.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format-dart.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-codegen.sh",
+            "timeout": 120,
+            "statusMessage": "Running build_runner codegen..."
+          }
+        ]
+      }
+    ]
+  }
+}
