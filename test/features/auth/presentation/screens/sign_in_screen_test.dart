@@ -70,7 +70,7 @@ void main() {
       expect(find.text('Sign-in unavailable'), findsOneWidget);
     });
 
-    testWidgets('buttons are disabled while loading', (tester) async {
+    testWidgets('both buttons are disabled and show spinners while loading', (tester) async {
       final completer = Completer<void>();
       when(() => authService.signInWithGoogle()).thenAnswer((_) => completer.future);
 
@@ -83,13 +83,13 @@ void main() {
       await tester.pump(); // One frame — still loading
 
       // Both buttons should have null onPressed (disabled) while loading.
-      final googleButton = tester.widget<ShadButton>(
-        find.ancestor(
-          of: find.byType(CircularProgressIndicator),
-          matching: find.byType(ShadButton),
-        ),
-      );
-      expect(googleButton.onPressed, isNull);
+      final buttons = tester.widgetList<ShadButton>(find.byType(ShadButton));
+      for (final button in buttons) {
+        expect(button.onPressed, isNull, reason: 'All buttons must be disabled during loading');
+      }
+
+      // Both buttons should show a spinner while loading.
+      expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
 
       completer.complete();
     });

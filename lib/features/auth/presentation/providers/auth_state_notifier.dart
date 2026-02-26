@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:song_requester/features/auth/application/auth_service.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'auth_state_notifier.g.dart';
 
@@ -18,8 +16,8 @@ class AuthStateNotifier extends _$AuthStateNotifier {
   UserProfile? build() {
     final service = ref.watch(authServiceProvider);
 
-    // Seed from current session synchronously.
-    final currentUser = Supabase.instance.client.auth.currentUser;
+    // Seed from current session synchronously via the service layer.
+    final currentUser = service.currentUser;
     final initial = currentUser == null
         ? null
         : UserProfile(
@@ -36,22 +34,5 @@ class AuthStateNotifier extends _$AuthStateNotifier {
     });
     ref.onDispose(() => unawaited(sub.cancel()));
     return initial;
-  }
-}
-
-/// A [ChangeNotifier] that notifies GoRouter when the auth state changes.
-/// Wrap Supabase's own stream so we don't depend on Riverpod in the router layer.
-class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
-    _sub = stream.listen((_) => notifyListeners());
-  }
-
-  late final StreamSubscription<dynamic> _sub;
-
-  @override
-  void dispose() {
-    unawaited(_sub.cancel());
-    super.dispose();
   }
 }

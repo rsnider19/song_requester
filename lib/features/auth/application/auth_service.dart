@@ -1,6 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:song_requester/app/providers/supabase_provider.dart';
+import 'package:song_requester/app/providers/logger_provider.dart';
 import 'package:song_requester/features/auth/data/repositories/auth_repository.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
@@ -13,6 +13,9 @@ class AuthService {
 
   final AuthRepository _repository;
   final Logger _logger;
+
+  /// Returns the currently authenticated [User], or null if no session exists.
+  User? get currentUser => _repository.currentUser;
 
   /// Returns a stream of [UserProfile?] derived from the raw auth state stream.
   /// Null means the user is fully unauthenticated (no session at all).
@@ -32,7 +35,7 @@ class AuthService {
   Future<UserProfile?> _toProfile(User? user) async {
     if (user == null) return null;
     try {
-      return await _repository.getProfile(user.id);
+      return await _repository.getProfile(user.id, isAnonymous: user.isAnonymous);
     } on Exception catch (e, st) {
       // Profile may not exist yet (trigger runs async); return a minimal guest.
       _logger.w('Profile not ready yet, returning minimal guest', error: e, stackTrace: st);

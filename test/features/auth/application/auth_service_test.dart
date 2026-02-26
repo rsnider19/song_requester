@@ -41,7 +41,9 @@ void main() {
         final mockUser = _MockUser(id: 'guest-id', isAnonymous: true);
 
         when(() => repository.watchAuthState()).thenAnswer((_) => controller.stream);
-        when(() => repository.getProfile('guest-id')).thenAnswer((_) async => guestProfile);
+        when(
+          () => repository.getProfile('guest-id', isAnonymous: true),
+        ).thenAnswer((_) async => guestProfile);
 
         final stream = service.watchUserProfile();
 
@@ -69,7 +71,9 @@ void main() {
         final mockUser = _MockUser(id: 'user-id', isAnonymous: false);
 
         when(() => repository.watchAuthState()).thenAnswer((_) => controller.stream);
-        when(() => repository.getProfile(any<String>())).thenThrow(const ProfileException('error'));
+        when(
+          () => repository.getProfile(any<String>(), isAnonymous: any<bool>(named: 'isAnonymous')),
+        ).thenThrow(const ProfileException('error'));
         when(
           () => logger.w(
             any<dynamic>(),
@@ -136,7 +140,9 @@ void main() {
         final mockUser = _MockUser(id: 'performer-id', isAnonymous: false);
 
         when(() => repository.watchAuthState()).thenAnswer((_) => controller.stream);
-        when(() => repository.getProfile('performer-id')).thenAnswer((_) async => performer);
+        when(
+          () => repository.getProfile('performer-id', isAnonymous: false),
+        ).thenAnswer((_) async => performer);
 
         final stream = service.watchUserProfile();
         controller.add(mockUser);

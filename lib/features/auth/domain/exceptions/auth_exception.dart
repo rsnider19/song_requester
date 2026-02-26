@@ -1,4 +1,4 @@
-abstract class AuthException implements Exception {
+sealed class AuthException implements Exception {
   const AuthException(this.message, [this.technicalDetails]);
 
   final String message;

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:song_requester/app/router/go_router_refresh_stream.dart';
 import 'package:song_requester/features/auth/presentation/providers/auth_state_notifier.dart';
 import 'package:song_requester/features/auth/presentation/screens/sign_in_screen.dart';
 import 'package:song_requester/features/counter/counter.dart';
@@ -22,13 +23,10 @@ class CounterRoute extends GoRouteData with $CounterRoute {
 
 @TypedGoRoute<SignInRoute>(path: '/sign-in')
 class SignInRoute extends GoRouteData with $SignInRoute {
-  const SignInRoute({this.redirectTo});
-
-  /// Optional path to navigate to after successful sign-in.
-  final String? redirectTo;
+  const SignInRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => SignInScreen(redirectTo: redirectTo);
+  Widget build(BuildContext context, GoRouterState state) => const SignInScreen();
 }
 
 // ---------------------------------------------------------------------------

@@ -35,18 +35,10 @@ RouteBase get $signInRoute =>
     GoRouteData.$route(path: '/sign-in', factory: $SignInRoute._fromState);
 
 mixin $SignInRoute on GoRouteData {
-  static SignInRoute _fromState(GoRouterState state) =>
-      SignInRoute(redirectTo: state.uri.queryParameters['redirect-to']);
-
-  SignInRoute get _self => this as SignInRoute;
+  static SignInRoute _fromState(GoRouterState state) => const SignInRoute();
 
   @override
-  String get location => GoRouteData.$location(
-    '/sign-in',
-    queryParams: {
-      if (_self.redirectTo != null) 'redirect-to': _self.redirectTo,
-    },
-  );
+  String get location => GoRouteData.$location('/sign-in');
 
   @override
   void go(BuildContext context) => context.go(location);

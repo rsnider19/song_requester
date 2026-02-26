@@ -2,6 +2,7 @@
 -- Creates the user profile table with RLS policies and new-user trigger.
 
 create table public.profile (
+  -- profile_id is the PK; the PK index covers RLS policy conditions and FK lookup to auth.users
   profile_id uuid references auth.users(id) on delete cascade primary key,
   email text,
   is_performer boolean not null default false,

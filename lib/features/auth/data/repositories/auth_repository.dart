@@ -1,5 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:song_requester/app/providers/logger_provider.dart';
 import 'package:song_requester/app/providers/supabase_provider.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
@@ -12,6 +13,9 @@ class AuthRepository {
 
   final SupabaseClient _supabase;
   final Logger _logger;
+
+  /// Returns the currently authenticated [User], or null if no session exists.
+  User? get currentUser => _supabase.auth.currentUser;
 
   /// Returns a stream of [User?] that emits whenever auth state changes.
   Stream<User?> watchAuthState() => _supabase.auth.onAuthStateChange.map((event) => event.session?.user);
@@ -51,18 +55,20 @@ class AuthRepository {
   }
 
   /// Fetches the [UserProfile] for [userId] from the profile table.
-  Future<UserProfile> getProfile(String userId) async {
+  ///
+  /// [isAnonymous] must be supplied by the caller from the live [User] object
+  /// to avoid a race where [currentUser] might be null mid-request.
+  Future<UserProfile> getProfile(String userId, {required bool isAnonymous}) async {
     try {
       final row = await _supabase
           .from('profile')
           .select('profile_id, email, is_performer')
           .eq('profile_id', userId)
           .single();
-      final user = _supabase.auth.currentUser;
       return UserProfile(
         id: row['profile_id'] as String,
         email: row['email'] as String?,
-        isAnonymous: user?.isAnonymous ?? true,
+        isAnonymous: isAnonymous,
         isPerformer: row['is_performer'] as bool,
       );
     } catch (e, st) {

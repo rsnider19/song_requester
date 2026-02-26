@@ -4,12 +4,10 @@ import 'package:gap/gap.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:song_requester/features/auth/application/auth_service.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
+import 'package:song_requester/widgets/app_scaffold.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
-  const SignInScreen({super.key, this.redirectTo});
-
-  /// Optional route to push after successful sign-in.
-  final String? redirectTo;
+  const SignInScreen({super.key});
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
@@ -39,7 +37,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Widget build(BuildContext context) {
     final service = ref.read(authServiceProvider);
 
-    return Scaffold(
+    return AppScaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -71,7 +69,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               const Gap(12),
               ShadButton.outline(
                 onPressed: _loading ? null : () => _signIn(service.signInWithApple),
-                child: const Text('Continue with Apple'),
+                child: _loading
+                    ? const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Continue with Apple'),
               ),
             ],
           ),
