@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Development-only manifest overlay.
+  Enables cleartext (HTTP) traffic so the app can reach a local Supabase
+  instance over the LAN. Never applied to staging or production builds.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="true" />
+</manifest>
