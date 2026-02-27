@@ -354,6 +354,7 @@ abstract class FeatureException implements Exception {
 - **State notifiers**: Class named `<ClassName>StateNotifier` generates `classNameStateProvider`
 - **UI providers**: `@riverpod` (auto-dispose) unless app-wide
 - Use `ref.watch()` for reactive dependencies
+- **`keepAlive` notifiers seeding from other providers**: Use `ref.watch` (not `ref.read`) in `build()` so the notifier rebuilds when the dependency changes. Using `ref.read` freezes the seed value at first-build time — e.g. a mode notifier seeded from auth state won't reset correctly after sign-out/sign-in within the same session.
 
 ### Testing
 
@@ -368,6 +369,7 @@ Write unit tests for repositories (mock Supabase client), services (mock reposit
 
 - **EXCLUSIVELY use `shadcn_ui` package for all widgets.** Do not use raw Material or Cupertino widgets directly.
 - If no `shadcn_ui` widget exists for a use case, create a custom widget in `lib/widgets/` — this directory is for **app-level shareable widgets only**.
+- **Exception — `Scaffold`**: `shadcn_ui` itself uses `Scaffold` internally, so it is permitted when needed (e.g. shell screens). Import it explicitly: `import 'package:flutter/material.dart' show Scaffold;` — never import all of `flutter/material.dart`.
 - Loading (shimmer/progress), error (retry button), empty states (CTA)
 - Confirmation dialogs for destructive actions
 - Accessibility: semantic labels, contrast, 48x48dp touch targets
@@ -381,6 +383,7 @@ Write unit tests for repositories (mock Supabase client), services (mock reposit
 - GoRouter in `app_router.dart` with guards
 - SnackBars for transient feedback, Dialogs for errors requiring action
 - User-friendly messages, log technical details, no auto-retry
+- **Redirect guard ordering**: Always check authentication first (before any mode or role routing). If `profile == null && loc != '/sign-in'` → redirect to `/sign-in`. This must be the first check to prevent unauthenticated users from hitting mode/role guards.
 
 ### Mock Data
 
