@@ -15,31 +15,6 @@ _(none)_
 
 ---
 
-## In Progress
-
-### Item 2: App Shell & Navigation (Milestone 1)
-
-**Summary:** Remove counter boilerplate, define the full navigation shell for both Audience and Performer modes, add route guards for performer-only screens, and wire up the mode toggle on the Profile/Settings screen.
-
-**Spec:** `docs/specs/02-app-modes.md`
-
-**Key files:**
-
-- `lib/app/router/app_router.dart`
-- `lib/features/auth/` (auth guards)
-- `lib/widgets/app_scaffold.dart`
-
-**Exit criteria:**
-
-- [ ] Counter feature removed
-- [ ] Audience mode shell: home, search, profile routes defined
-- [ ] Performer mode shell: home, profile, gig management routes defined
-- [ ] Performer-only routes guarded — redirects non-performers to audience home
-- [ ] Mode toggle visible on Profile/Settings screen for opted-in performers
-- [ ] Switching modes reloads the correct navigation structure
-
----
-
 ## Next
 
 ### Item 3: Performer Opt-in Flow (Milestone 1)
@@ -331,6 +306,12 @@ _(none)_
 ---
 
 ## Done
+
+### Item 2: App Shell & Navigation (Milestone 1)
+
+**Summary:** Removed counter boilerplate, defined the full navigation shell for both Audience and Performer modes, added route guards for performer-only screens, and wired up the mode toggle on the Profile screen.
+
+---
 
 ### Item 1: Auth & Account Creation (Milestone 1)
 

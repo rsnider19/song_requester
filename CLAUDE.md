@@ -354,6 +354,7 @@ abstract class FeatureException implements Exception {
 - **State notifiers**: Class named `<ClassName>StateNotifier` generates `classNameStateProvider`
 - **UI providers**: `@riverpod` (auto-dispose) unless app-wide
 - Use `ref.watch()` for reactive dependencies
+- **`keepAlive` notifiers seeding from other providers**: Use `ref.watch` (not `ref.read`) in `build()` so the notifier rebuilds when the dependency changes. Using `ref.read` freezes the seed value at first-build time — e.g. a mode notifier seeded from auth state won't reset correctly after sign-out/sign-in within the same session.
 
 ### Testing
 
@@ -366,11 +367,43 @@ Write unit tests for repositories (mock Supabase client), services (mock reposit
 
 ### UI/UX
 
-- **EXCLUSIVELY use `shadcn_ui` package for all widgets.** Do not use raw Material or Cupertino widgets directly.
+Use `shadcn_ui` (`package:shadcn_ui/shadcn_ui.dart`) as the primary UI system. Minimize Material influence.
+
+#### App root
+- Use `ShadApp` or `ShadApp.router` — never `MaterialApp`.
+- Theme via `ShadThemeData`. Access with `ShadTheme.of(context)` — never `Theme.of(context)`.
+- Colors: `theme.colorScheme.primary/background/foreground/border/muted/destructive/card`
+- Text: `theme.textTheme.h1/.h2/.h3/.h4/.p/.small/.muted/.large/.lead`
+
+#### Components (all prefixed `Shad`)
+- Buttons: `ShadButton`, `.secondary`, `.destructive`, `.outline`, `.ghost`, `.link`
+- Inputs: `ShadInput` (standalone), `ShadInputFormField` (in forms)
+- Select: `ShadSelect<T>` with `ShadOption` children. Searchable: `ShadSelect.withSearch`
+- Dialog: `showShadDialog` → `ShadDialog` or `ShadDialog.alert`. Never `showDialog`.
+- Toast: `ShadToaster.of(context).show(ShadToast(...))`. Never `ScaffoldMessenger`.
+- Forms: `ShadForm` + `GlobalKey<ShadFormState>`. Validate via `formKey.currentState!.saveAndValidate()`.
+- Other: `ShadCard`, `ShadBadge`, `ShadCheckbox`, `ShadSwitch`, `ShadAccordion`, `ShadTabs`, `ShadTooltip`, `ShadSheet`, `ShadProgress`, `ShadSlider`
+
+#### Icons
+- Use `LucideIcons.*` (bundled with `shadcn_ui`). Never `Icons.*` or `CupertinoIcons.*`.
+
+#### Layout — no Scaffold
+- Use `ColoredBox(color: theme.colorScheme.background)` + `SafeArea` instead of `Scaffold`.
+- The project's `AppScaffold` widget (`lib/widgets/app_scaffold.dart`) is the standard layout wrapper — use it for all screens.
+- Spacing: `Gap(n)` from the `gap` package in `Column`/`Row`/`Flex`. `SizedBox` for fixed dimensions only.
+- Borders: `Border.all(color: theme.colorScheme.border)` + `theme.radius`.
+
+#### Known Material exception
+- `CircularProgressIndicator` is acceptable for loading states. Import explicitly: `import 'package:flutter/material.dart' show CircularProgressIndicator;`. Never import all of `flutter/material.dart`.
+- Always add `import 'package:flutter/widgets.dart';` alongside it to supply the core widget types.
+
+#### Custom widgets
 - If no `shadcn_ui` widget exists for a use case, create a custom widget in `lib/widgets/` — this directory is for **app-level shareable widgets only**.
+
+#### UX standards
 - Loading (shimmer/progress), error (retry button), empty states (CTA)
 - Confirmation dialogs for destructive actions
-- Accessibility: semantic labels, contrast, 48x48dp touch targets
+- Accessibility: semantic labels, contrast, 48×48 dp touch targets
 
 ### Permissions
 
@@ -381,6 +414,7 @@ Write unit tests for repositories (mock Supabase client), services (mock reposit
 - GoRouter in `app_router.dart` with guards
 - SnackBars for transient feedback, Dialogs for errors requiring action
 - User-friendly messages, log technical details, no auto-retry
+- **Redirect guard ordering**: Always check authentication first (before any mode or role routing). If `profile == null && loc != '/sign-in'` → redirect to `/sign-in`. This must be the first check to prevent unauthenticated users from hitting mode/role guards.
 
 ### Mock Data
 
