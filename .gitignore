@@ -119,6 +119,7 @@ lib/l10n/gen/
 # Environment files (contain secrets — never commit)
 env/
 supabase/.env
+supabase/functions/.env
 
 # Claude Code worktrees
 .claude/worktrees/
