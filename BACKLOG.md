@@ -11,12 +11,6 @@
 
 ## In Progress
 
-_(none)_
-
----
-
-## Next
-
 ### Item 3: Performer Opt-in Flow (Milestone 1)
 
 **Summary:** Build the self-serve performer opt-in flow, reachable from the "Become a Performer" CTA (deferred to audience home screen item) and Settings. Updates the user's `isPerformer` flag and presents Stripe onboarding as an optional next step (Stripe integration comes in a later item).
@@ -38,7 +32,7 @@ _(none)_
 
 ---
 
-## Upcoming
+## Next
 
 ### Item 4: Song Management (Milestone 2)
 

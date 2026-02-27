@@ -35,4 +35,11 @@ class AuthStateNotifier extends _$AuthStateNotifier {
     ref.onDispose(() => unawaited(sub.cancel()));
     return initial;
   }
+
+  /// Directly updates the in-memory profile without waiting for an auth event.
+  ///
+  /// Use this after a profile mutation (e.g. performer opt-in) to synchronously
+  /// reflect the change so router guards see the new state immediately.
+  // ignore: use_setters_to_change_properties
+  void updateProfile(UserProfile profile) => state = profile;
 }

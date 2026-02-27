@@ -360,6 +360,24 @@ abstract class FeatureException implements Exception {
 
 Write unit tests for repositories (mock Supabase client), services (mock repositories), and domain models. Write widget tests for UI (loading/error/success states). Focus on behaviors over coverage percentages.
 
+- **`overrideWith` vs `overrideWithValue` for notifiers**: Use `overrideWith(() => FakeNotifier())` when the test needs to call methods or set properties on the notifier (e.g. `ref.read(provider.notifier).someMethod()`). `overrideWithValue(value)` creates a value-only element — accessing `.notifier` on it throws a type cast error at runtime.
+  ```dart
+  // ✅ CORRECT — .notifier methods work
+  authStateProvider.overrideWith(() => _FakeAuthStateNotifier(_profile))
+  // ❌ WRONG — crashes if any code accesses authStateProvider.notifier
+  authStateProvider.overrideWithValue(_profile)
+  ```
+
+- **`Completer` instead of `Future.delayed` for blocking async in widget tests**: `Future.delayed(Duration(seconds: N))` registers a timer that the test framework detects as "pending async", causing test failures. Use `Completer<T>` instead — it suspends a future without registering a timer and is safe to leave uncompleted or complete in `addTearDown`.
+  ```dart
+  // ✅ CORRECT
+  final completer = Completer<UserProfile>();
+  when(() => service.becomePerformer(any())).thenAnswer((_) => completer.future);
+  // addTearDown(() => completer.complete(value)); // if cleanup needed
+  // ❌ WRONG — leaves pending timer, test fails
+  when(() => service.becomePerformer(any())).thenAnswer((_) => Future.delayed(const Duration(seconds: 60)));
+  ```
+
 ### Validation & Configuration
 
 - Services validate (not repositories), throw specific exceptions
@@ -415,6 +433,8 @@ Use `shadcn_ui` (`package:shadcn_ui/shadcn_ui.dart`) as the primary UI system. M
 - SnackBars for transient feedback, Dialogs for errors requiring action
 - User-friendly messages, log technical details, no auto-retry
 - **Redirect guard ordering**: Always check authentication first (before any mode or role routing). If `profile == null && loc != '/sign-in'` → redirect to `/sign-in`. This must be the first check to prevent unauthenticated users from hitting mode/role guards.
+- **Router guard prefix collisions**: `startsWith('/performer')` also matches `/performer-onboarding`. When adding a top-level route whose prefix overlaps with an existing guard predicate, exclude it explicitly: `loc.startsWith('/performer') && !loc.startsWith('/performer-onboarding')`. Always check new route paths against all existing `startsWith` guards in `app_router.dart`.
+- **Mode change triggers router refresh — don't also `context.go()`**: Setting a mode-based notifier (e.g. `appModeProvider.notifier.mode = AppMode.performer`) already triggers `router.refresh()`, which causes the redirect guard to handle navigation. Adding an explicit `context.go(...)` alongside it creates a double-navigation race. Let the guard do the routing; omit the manual navigation call.
 
 ### Mock Data
 

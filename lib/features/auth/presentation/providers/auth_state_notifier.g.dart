@@ -53,7 +53,7 @@ final class AuthStateNotifierProvider
   }
 }
 
-String _$authStateNotifierHash() => r'713764f7a2c85bb1c5023a87df0e7b912e280ab7';
+String _$authStateNotifierHash() => r'1dd6bc4cc79d8446738a537e4972284ebc6ed536';
 
 /// Exposes the current [UserProfile?].
 /// - `null`  → no session (should not happen in normal use; bootstrap creates anonymous session)
