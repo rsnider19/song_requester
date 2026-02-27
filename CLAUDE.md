@@ -367,6 +367,7 @@ Write unit tests for repositories (mock Supabase client), services (mock reposit
   // ❌ WRONG — crashes if any code accesses authStateProvider.notifier
   authStateProvider.overrideWithValue(_profile)
   ```
+  This also applies when a **dependent provider** accesses `.notifier` on the overridden provider — not just the test code itself. E.g. if `FooNotifier.build()` calls `ref.read(authStateProvider.notifier).someMethod()`, then overriding `authStateProvider` with `overrideWithValue` in a test that exercises `FooNotifier` will crash at runtime, even though the test never directly accesses `authStateProvider.notifier`. When in doubt, prefer `overrideWith`.
 
 - **`Completer` instead of `Future.delayed` for blocking async in widget tests**: `Future.delayed(Duration(seconds: N))` registers a timer that the test framework detects as "pending async", causing test failures. Use `Completer<T>` instead — it suspends a future without registering a timer and is safe to leave uncompleted or complete in `addTearDown`.
   ```dart
