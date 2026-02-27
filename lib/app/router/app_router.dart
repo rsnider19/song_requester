@@ -222,7 +222,7 @@ GoRouter goRouter(Ref ref) {
       final mode = ref.read(appModeProvider);
       final isPerformer = profile?.isPerformer ?? false;
       final loc = state.matchedLocation;
-      final isPerformerRoute = loc.startsWith('/performer');
+      final isPerformerRoute = loc.startsWith('/performer') && !loc.startsWith('/performer-onboarding');
 
       // Guard: unauthenticated users must sign in first.
       if (profile == null && loc != '/sign-in') return '/sign-in';

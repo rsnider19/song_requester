@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:song_requester/app/router/app_router.dart';
 import 'package:song_requester/features/auth/presentation/providers/auth_state_notifier.dart';
 import 'package:song_requester/features/performer_onboarding/presentation/providers/performer_onboarding_state_notifier.dart';
 import 'package:song_requester/widgets/app_scaffold.dart';
@@ -29,7 +30,7 @@ class PerformerOnboardingScreen extends ConsumerWidget {
         );
         ref.read(performerOnboardingStateProvider.notifier).resetError();
       } else if (next is PerformerOnboardingSuccess) {
-        unawaited(context.push('/performer-onboarding/stripe'));
+        unawaited(const PerformerStripePromptRoute().push(context));
       }
     });
 

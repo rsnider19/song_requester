@@ -32,6 +32,16 @@ void main() {
 
   group('PerformerOnboardingService', () {
     group('becomePerformer', () {
+      test('throws BecomePerformerException when userId is empty', () async {
+        await expectLater(
+          service.becomePerformer(''),
+          throwsA(
+            isA<BecomePerformerException>().having((e) => e.message, 'message', 'User ID is required.'),
+          ),
+        );
+        verifyNever(() => authService.becomePerformer(any()));
+      });
+
       test('returns updated UserProfile on success', () async {
         const updatedProfile = UserProfile(
           id: 'user-id',

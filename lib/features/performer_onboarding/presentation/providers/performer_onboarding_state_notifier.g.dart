@@ -48,7 +48,7 @@ final class PerformerOnboardingStateNotifierProvider
 }
 
 String _$performerOnboardingStateNotifierHash() =>
-    r'7a99349b5f07e0e9401aae22e4f4bcf07892b148';
+    r'47a85cd62106a2b9aa6eb2b3b9f70c56134389e6';
 
 abstract class _$PerformerOnboardingStateNotifier
     extends $Notifier<PerformerOnboardingState> {

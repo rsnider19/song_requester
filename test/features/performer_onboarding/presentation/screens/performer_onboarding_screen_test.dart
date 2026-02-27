@@ -129,6 +129,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Error toast appears and notifier resets to idle.
+      expect(find.text('Something went wrong'), findsOneWidget);
       expect(container.read(performerOnboardingStateProvider), isA<PerformerOnboardingIdle>());
     });
 

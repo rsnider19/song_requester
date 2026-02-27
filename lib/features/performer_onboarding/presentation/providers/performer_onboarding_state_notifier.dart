@@ -47,7 +47,7 @@ class PerformerOnboardingStateNotifier extends _$PerformerOnboardingStateNotifie
     try {
       final updatedProfile = await ref.read(performerOnboardingServiceProvider).becomePerformer(userId);
       // Update auth state synchronously so AppModeNotifier rebuilds before navigation.
-      ref.read(authStateProvider.notifier).profile = updatedProfile;
+      ref.read(authStateProvider.notifier).updateProfile(updatedProfile);
       state = const PerformerOnboardingSuccess();
     } on BecomePerformerException catch (e) {
       state = PerformerOnboardingError(e.message);

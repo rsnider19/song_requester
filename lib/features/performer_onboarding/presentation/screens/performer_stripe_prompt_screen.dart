@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:song_requester/app/providers/app_mode_notifier.dart';
 import 'package:song_requester/widgets/app_scaffold.dart';
@@ -11,7 +10,7 @@ class PerformerStripePromptScreen extends ConsumerWidget {
 
   void _enterPerformerMode(BuildContext context, WidgetRef ref) {
     ref.read(appModeProvider.notifier).mode = AppMode.performer;
-    context.go('/performer/gigs');
+    // Router refresh will redirect to /performer/gigs via the mode-sync guard.
   }
 
   @override

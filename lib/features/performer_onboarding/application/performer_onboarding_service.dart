@@ -18,6 +18,7 @@ class PerformerOnboardingService {
   /// Returns the updated [UserProfile] with [UserProfile.isPerformer] == true.
   /// Throws [BecomePerformerException] on failure.
   Future<UserProfile> becomePerformer(String userId) async {
+    if (userId.isEmpty) throw const BecomePerformerException('User ID is required.');
     try {
       return await _authService.becomePerformer(userId);
     } on ProfileException catch (e, st) {
