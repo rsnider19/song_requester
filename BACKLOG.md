@@ -11,25 +11,6 @@
 
 ## In Progress
 
-### Item 3: Performer Opt-in Flow (Milestone 1)
-
-**Summary:** Build the self-serve performer opt-in flow, reachable from the "Become a Performer" CTA (deferred to audience home screen item) and Settings. Updates the user's `isPerformer` flag and presents Stripe onboarding as an optional next step (Stripe integration comes in a later item).
-
-**Spec:** `docs/specs/01-auth.md` (performer opt-in section)
-
-**Key files:**
-
-- `lib/features/auth/` (update user profile)
-- `lib/features/performer_onboarding/` (new)
-
-**Exit criteria:**
-
-- [ ] Opt-in flow accessible from Settings screen
-- [ ] Tapping opt-in sets `isPerformer = true` on the user's profile in Supabase
-- [ ] Performer mode becomes accessible immediately after opt-in
-- [ ] Post-opt-in screen prompts Stripe setup with a clear skip option
-- [ ] Skipping Stripe still completes opt-in successfully
-
 ---
 
 ## Next
@@ -300,6 +281,12 @@
 ---
 
 ## Done
+
+### Item 3: Performer Opt-in Flow (Milestone 1)
+
+**Summary:** Flow was already fully implemented. Added missing tests: `PerformerOnboardingStateNotifier` unit tests (state machine transitions, empty userId edge case, unexpected exception propagation) and `PerformerStripePromptScreen` widget tests (render, skip sets performer mode, Stripe button shows coming-soon toast).
+
+---
 
 ### Item 2: App Shell & Navigation (Milestone 1)
 
