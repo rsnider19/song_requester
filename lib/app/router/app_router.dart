@@ -227,6 +227,9 @@ GoRouter goRouter(Ref ref) {
       // Guard: unauthenticated users must sign in first.
       if (profile == null && loc != '/sign-in') return '/sign-in';
 
+      // Guard: authenticated users should not linger on the sign-in screen.
+      if (profile != null && loc == '/sign-in') return '/home';
+
       // Guard: non-performers cannot access performer routes.
       if (isPerformerRoute && !isPerformer) return '/home';
 
@@ -242,8 +245,11 @@ GoRouter goRouter(Ref ref) {
     },
   );
 
-  // Refresh the router whenever mode changes so redirect runs immediately.
-  ref.listen(appModeProvider, (_, _) => router.refresh());
+  // Refresh the router whenever mode or auth profile changes so redirect runs
+  // after async state (e.g. profile DB fetch in asyncMap) has settled.
+  ref
+    ..listen(appModeProvider, (_, _) => router.refresh())
+    ..listen(authStateProvider, (_, _) => router.refresh());
 
   return router;
 }
