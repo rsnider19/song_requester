@@ -1,0 +1,45 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "supabase-local",
+      "runtimeExecutable": "supabase",
+      "runtimeArgs": ["start"],
+      "port": 54333
+    },
+    {
+      "name": "flutter-web-dev",
+      "runtimeExecutable": "fvm",
+      "runtimeArgs": [
+        "flutter",
+        "run",
+        "-d",
+        "chrome",
+        "--flavor",
+        "development",
+        "--target",
+        "lib/main_development.dart",
+        "--web-port",
+        "8080"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "flutter-web-staging",
+      "runtimeExecutable": "fvm",
+      "runtimeArgs": [
+        "flutter",
+        "run",
+        "-d",
+        "chrome",
+        "--flavor",
+        "staging",
+        "--target",
+        "lib/main_staging.dart",
+        "--web-port",
+        "8081"
+      ],
+      "port": 8081
+    }
+  ]
+}
