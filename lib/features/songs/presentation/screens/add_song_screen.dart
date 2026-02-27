@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' show CircularProgressIndicator;
 import 'package:flutter/widgets.dart';
@@ -21,26 +19,21 @@ class AddSongScreen extends ConsumerStatefulWidget {
 
 class _AddSongScreenState extends ConsumerState<AddSongScreen> {
   String _query = '';
-  Set<String> _libraryTrackIds = {};
-  bool _libraryTrackIdsLoaded = false;
 
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadLibraryTrackIds());
-  }
-
-  Future<void> _loadLibraryTrackIds() async {
-    final library = ref.read(songLibraryStateProvider).value ?? [];
-    setState(() {
-      _libraryTrackIds = library.map((ps) => ps.song.spotifyTrackId).toSet();
-      _libraryTrackIdsLoaded = true;
-    });
-  }
+  /// Track IDs added optimistically during this session (before the library
+  /// provider has refreshed).
+  final Set<String> _optimisticTrackIds = {};
 
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
+
+    // Derive track IDs reactively so we pick up changes if the library loads
+    // after this screen was already open.
+    final libraryAsync = ref.watch(songLibraryStateProvider);
+    final libraryTrackIds = libraryAsync.value?.map((ps) => ps.song.spotifyTrackId).toSet() ?? <String>{};
+    final allTrackIds = {...libraryTrackIds, ..._optimisticTrackIds};
+    final libraryLoaded = libraryAsync.hasValue;
 
     return AppScaffold(
       title: Row(
@@ -73,8 +66,8 @@ class _AddSongScreenState extends ConsumerState<AddSongScreen> {
                   ? _SearchPrompt(theme: theme)
                   : _SearchResults(
                       query: _query,
-                      libraryTrackIds: _libraryTrackIds,
-                      libraryTrackIdsLoaded: _libraryTrackIdsLoaded,
+                      libraryTrackIds: allTrackIds,
+                      libraryTrackIdsLoaded: libraryLoaded,
                       onAdd: _addSong,
                     ),
             ),
@@ -86,7 +79,7 @@ class _AddSongScreenState extends ConsumerState<AddSongScreen> {
 
   Future<void> _addSong(SpotifySearchResult result) async {
     // Optimistically mark as in library.
-    setState(() => _libraryTrackIds = {..._libraryTrackIds, result.spotifyTrackId});
+    setState(() => _optimisticTrackIds.add(result.spotifyTrackId));
 
     try {
       final softLimitReached = await ref.read(songLibraryStateProvider.notifier).addSong(result);
@@ -110,9 +103,7 @@ class _AddSongScreenState extends ConsumerState<AddSongScreen> {
     } on Exception {
       if (!mounted) return;
       // Revert optimistic update.
-      setState(() {
-        _libraryTrackIds = {..._libraryTrackIds}..remove(result.spotifyTrackId);
-      });
+      setState(() => _optimisticTrackIds.remove(result.spotifyTrackId));
 
       ShadToaster.of(context).show(
         const ShadToast.destructive(
