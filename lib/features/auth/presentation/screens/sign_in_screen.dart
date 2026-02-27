@@ -77,6 +77,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       )
                     : const Text('Continue with Apple'),
               ),
+              const Gap(24),
+              ShadButton.ghost(
+                onPressed: _loading ? null : () => _signIn(service.signInAnonymously),
+                child: const Text('Continue as guest'),
+              ),
             ],
           ),
         ),
