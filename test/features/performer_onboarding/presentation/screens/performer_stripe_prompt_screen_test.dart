@@ -5,17 +5,33 @@ import 'package:song_requester/app/providers/app_mode_notifier.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
 import 'package:song_requester/features/auth/presentation/providers/auth_state_notifier.dart';
 import 'package:song_requester/features/performer_onboarding/presentation/screens/performer_stripe_prompt_screen.dart';
+import 'package:song_requester/l10n/l10n.dart';
 
 import '../../../../helpers/helpers.dart';
+
+// ---------------------------------------------------------------------------
+// Mocks & fakes
+// ---------------------------------------------------------------------------
+
+/// Seeds a fixed profile without subscribing to any streams.
+class _FakeAuthStateNotifier extends AuthStateNotifier {
+  _FakeAuthStateNotifier(this._profile);
+  final UserProfile? _profile;
+
+  @override
+  UserProfile? build() => _profile;
+}
 
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const _audienceProfile = UserProfile(
+/// This screen is shown after successful performer opt-in, so the profile
+/// should reflect [isPerformer: true].
+const _performerProfile = UserProfile(
   id: 'user-id',
   isAnonymous: false,
-  isPerformer: false,
+  isPerformer: true,
   email: 'user@example.com',
 );
 
@@ -29,7 +45,7 @@ void main() {
       await tester.pumpApp(
         const PerformerStripePromptScreen(),
         overrides: [
-          authStateProvider.overrideWithValue(_audienceProfile),
+          authStateProvider.overrideWith(() => _FakeAuthStateNotifier(_performerProfile)),
         ],
       );
 
@@ -42,7 +58,7 @@ void main() {
     testWidgets('Skip for now sets app mode to performer', (tester) async {
       final container = ProviderContainer(
         overrides: [
-          authStateProvider.overrideWithValue(_audienceProfile),
+          authStateProvider.overrideWith(() => _FakeAuthStateNotifier(_performerProfile)),
         ],
       );
       addTearDown(container.dispose);
@@ -50,11 +66,15 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const ShadApp(home: PerformerStripePromptScreen()),
+          child: const ShadApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: PerformerStripePromptScreen(),
+          ),
         ),
       );
 
-      expect(container.read(appModeProvider), AppMode.audience);
+      expect(container.read(appModeProvider), AppMode.performer);
 
       await tester.tap(find.text('Skip for now'));
       await tester.pump();
@@ -65,7 +85,7 @@ void main() {
     testWidgets('Set up Stripe shows coming-soon toast and sets performer mode', (tester) async {
       final container = ProviderContainer(
         overrides: [
-          authStateProvider.overrideWithValue(_audienceProfile),
+          authStateProvider.overrideWith(() => _FakeAuthStateNotifier(_performerProfile)),
         ],
       );
       addTearDown(container.dispose);
@@ -74,6 +94,8 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: const ShadApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: ShadToaster(child: PerformerStripePromptScreen()),
           ),
         ),

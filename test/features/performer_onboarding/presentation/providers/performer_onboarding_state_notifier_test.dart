@@ -73,7 +73,7 @@ void main() {
     });
 
     test('confirmOptIn emits loading then success on service success', () async {
-      when(() => service.becomePerformer(any())).thenAnswer((_) async => _performerProfile);
+      when(() => service.becomePerformer('user-id')).thenAnswer((_) async => _performerProfile);
 
       final container = makeContainer();
       final states = <PerformerOnboardingState>[];
@@ -85,15 +85,17 @@ void main() {
       await container.read(performerOnboardingStateProvider.notifier).confirmOptIn('user-id');
 
       expect(states, [isA<PerformerOnboardingLoading>(), isA<PerformerOnboardingSuccess>()]);
+      verify(() => service.becomePerformer('user-id')).called(1);
     });
 
     test('confirmOptIn updates auth state with returned profile on success', () async {
-      when(() => service.becomePerformer(any())).thenAnswer((_) async => _performerProfile);
+      when(() => service.becomePerformer('user-id')).thenAnswer((_) async => _performerProfile);
 
       final container = makeContainer();
       await container.read(performerOnboardingStateProvider.notifier).confirmOptIn('user-id');
 
       expect(container.read(authStateProvider)?.isPerformer, isTrue);
+      verify(() => service.becomePerformer('user-id')).called(1);
     });
 
     test('confirmOptIn emits loading then error on BecomePerformerException', () async {
@@ -115,6 +117,35 @@ void main() {
         isA<PerformerOnboardingLoading>(),
         isA<PerformerOnboardingError>().having((e) => e.message, 'message', errorMessage),
       ]);
+    });
+
+    test('confirmOptIn emits loading then error when userId is empty', () async {
+      when(() => service.becomePerformer('')).thenThrow(
+        const BecomePerformerException('User ID is required.'),
+      );
+      final container = makeContainer();
+      final states = <PerformerOnboardingState>[];
+      container.listen(performerOnboardingStateProvider, (_, next) => states.add(next));
+
+      await container.read(performerOnboardingStateProvider.notifier).confirmOptIn('');
+
+      expect(states, [
+        isA<PerformerOnboardingLoading>(),
+        isA<PerformerOnboardingError>().having((e) => e.message, 'message', 'User ID is required.'),
+      ]);
+    });
+
+    test('confirmOptIn propagates unexpected exceptions', () async {
+      when(() => service.becomePerformer(any())).thenThrow(Exception('network error'));
+
+      final container = makeContainer();
+
+      await expectLater(
+        container.read(performerOnboardingStateProvider.notifier).confirmOptIn('user-id'),
+        throwsA(isA<Exception>()),
+      );
+      // State should still be loading (the exception happened before success/error could be set)
+      expect(container.read(performerOnboardingStateProvider), isA<PerformerOnboardingLoading>());
     });
 
     test('resetError transitions from error back to idle', () async {
