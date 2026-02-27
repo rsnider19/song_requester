@@ -269,5 +269,77 @@ void main() {
       expect(find.text('Bohemian Rhapsody'), findsOneWidget);
       expect(find.text('Hotel California'), findsNothing);
     });
+
+    testWidgets('hides Edit button when filter is active', (tester) async {
+      await tester.pumpApp(
+        const SongsScreen(),
+        overrides: [
+          songLibraryStateProvider.overrideWith(
+            () => _FakeSongLibraryStateNotifier(
+              const AsyncData([_performerSong1, _performerSong2]),
+            ),
+          ),
+        ],
+      );
+
+      // Edit button is visible initially.
+      expect(find.text('Edit'), findsOneWidget);
+
+      // Type a filter query.
+      await tester.enterText(find.byType(EditableText), 'bohemian');
+      await tester.pump();
+
+      // Edit button is hidden when filter is active.
+      expect(find.text('Edit'), findsNothing);
+    });
+
+    testWidgets('exits edit mode when filter text is entered', (tester) async {
+      await tester.pumpApp(
+        const SongsScreen(),
+        overrides: [
+          songLibraryStateProvider.overrideWith(
+            () => _FakeSongLibraryStateNotifier(
+              const AsyncData([_performerSong1, _performerSong2]),
+            ),
+          ),
+        ],
+      );
+
+      // Enter edit mode.
+      await tester.tap(find.text('Edit'));
+      await tester.pump();
+      expect(find.text('Done'), findsOneWidget);
+
+      // Type a filter query — should exit edit mode.
+      await tester.enterText(find.byType(EditableText), 'test');
+      await tester.pump();
+
+      // Edit mode is exited (neither Edit nor Done visible because filter is active).
+      expect(find.text('Done'), findsNothing);
+      expect(find.text('Edit'), findsNothing);
+    });
+
+    testWidgets('shows filtered count when filter is active', (tester) async {
+      await tester.pumpApp(
+        const SongsScreen(),
+        overrides: [
+          songLibraryStateProvider.overrideWith(
+            () => _FakeSongLibraryStateNotifier(
+              const AsyncData([_performerSong1, _performerSong2]),
+            ),
+          ),
+        ],
+      );
+
+      // Shows total count initially.
+      expect(find.text('2 songs'), findsOneWidget);
+
+      // Type a filter query.
+      await tester.enterText(find.byType(EditableText), 'bohemian');
+      await tester.pump();
+
+      // Shows filtered count.
+      expect(find.text('1 of 2 songs'), findsOneWidget);
+    });
   });
 }
