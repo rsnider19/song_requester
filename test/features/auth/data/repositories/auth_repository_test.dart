@@ -38,31 +38,6 @@ void main() {
   });
 
   group('AuthRepository', () {
-    group('signInAnonymously', () {
-      test('calls supabase.auth.signInAnonymously', () async {
-        when(() => auth.signInAnonymously()).thenAnswer((_) async => AuthResponse());
-
-        await expectLater(repository.signInAnonymously(), completes);
-        verify(() => auth.signInAnonymously()).called(1);
-      });
-
-      test('throws SignInException on failure', () async {
-        when(() => auth.signInAnonymously()).thenThrow(Exception('network error'));
-        when(
-          () => logger.e(
-            any<dynamic>(),
-            error: any<Object?>(named: 'error'),
-            stackTrace: any<StackTrace?>(named: 'stackTrace'),
-          ),
-        ).thenReturn(null);
-
-        await expectLater(
-          repository.signInAnonymously(),
-          throwsA(isA<SignInException>()),
-        );
-      });
-    });
-
     // signInWithGoogle and signInWithApple use native SDK sheets and require
     // integration testing on a real device. Unit tests for those flows are
     // omitted here intentionally.

@@ -20,9 +20,6 @@ class AuthService {
   /// Null means the user is fully unauthenticated (no session at all).
   Stream<UserProfile?> watchUserProfile() => _repository.watchAuthState().asyncMap(_toProfile);
 
-  /// Signs in anonymously (guest session). Callers should handle [SignInException].
-  Future<void> signInAnonymously() => _repository.signInAnonymously();
-
   /// Signs in with Google. Stubs throw; callers should handle [SignInException].
   Future<void> signInWithGoogle() => _repository.signInWithGoogle();
 
