@@ -11,10 +11,6 @@
 
 ## In Progress
 
----
-
-## Next
-
 ### Item 4: Song Management (Milestone 2)
 
 **Summary:** Implement the performer song library. Integrate Spotify API for song search (client credentials flow), store title, artist, and Spotify track ID. Support manual fallback entry. Genre derived from Spotify metadata.
@@ -37,6 +33,8 @@
 - [ ] Unit tests for song repository and service
 
 ---
+
+## Next
 
 ### Item 5: Add / Edit Gig (Milestone 2)
 
