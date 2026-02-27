@@ -34,21 +34,13 @@ class AuthRepository {
   /// Returns a stream of [User?] that emits whenever auth state changes.
   Stream<User?> watchAuthState() => _supabase.auth.onAuthStateChange.map((event) => event.session?.user);
 
-  /// Signs in anonymously. No-op if a session already exists.
-  Future<void> signInAnonymously() async {
-    try {
-      await _supabase.auth.signInAnonymously();
-    } catch (e, st) {
-      _logger.e('Failed to sign in anonymously', error: e, stackTrace: st);
-      throw SignInException('Could not create guest session', e.toString());
-    }
-  }
-
   /// Signs in with Google using the native SDK flow.
   ///
   /// Calls `GoogleSignIn.signIn` to retrieve an ID token, then exchanges it
-  /// with Supabase via `signInWithIdToken`. Returns silently if the user
-  /// cancels the sign-in sheet.
+  /// with Supabase. If the current user is anonymous, uses
+  /// `linkIdentityWithIdToken` to promote the anonymous session to a permanent
+  /// account (preserving the user ID and profile). Otherwise performs a
+  /// regular sign-in. Returns silently if the user cancels the sign-in sheet.
   Future<void> signInWithGoogle() async {
     try {
       final googleSignIn = GoogleSignIn(
@@ -66,11 +58,19 @@ class AuthRepository {
       if (accessToken == null) throw const SignInException('Google Sign-In failed: no access token received');
       if (idToken == null) throw const SignInException('Google Sign-In failed: no ID token received');
 
-      await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
+      if (_supabase.auth.currentUser?.isAnonymous == true) {
+        await _supabase.auth.linkIdentityWithIdToken(
+          provider: OAuthProvider.google,
+          idToken: idToken,
+          accessToken: accessToken,
+        );
+      } else {
+        await _supabase.auth.signInWithIdToken(
+          provider: OAuthProvider.google,
+          idToken: idToken,
+          accessToken: accessToken,
+        );
+      }
     } on SignInException {
       rethrow;
     } catch (e, st) {
@@ -82,8 +82,9 @@ class AuthRepository {
   /// Signs in with Apple using the native SDK flow (iOS/macOS only).
   ///
   /// Generates a PKCE nonce, calls [SignInWithApple.getAppleIDCredential],
-  /// then exchanges the identity token with Supabase. Returns silently if
-  /// the user cancels.
+  /// then exchanges the identity token with Supabase. If the current user is
+  /// anonymous, uses `linkIdentityWithIdToken` to promote the anonymous
+  /// session to a permanent account. Returns silently if the user cancels.
   Future<void> signInWithApple() async {
     try {
       final rawNonce = _generateNonce();
@@ -100,11 +101,19 @@ class AuthRepository {
       final idToken = credential.identityToken;
       if (idToken == null) throw const SignInException('Apple Sign-In failed: no identity token received');
 
-      await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.apple,
-        idToken: idToken,
-        nonce: rawNonce,
-      );
+      if (_supabase.auth.currentUser?.isAnonymous == true) {
+        await _supabase.auth.linkIdentityWithIdToken(
+          provider: OAuthProvider.apple,
+          idToken: idToken,
+          nonce: rawNonce,
+        );
+      } else {
+        await _supabase.auth.signInWithIdToken(
+          provider: OAuthProvider.apple,
+          idToken: idToken,
+          nonce: rawNonce,
+        );
+      }
     } on SignInWithAppleAuthorizationException catch (e, st) {
       if (e.code == AuthorizationErrorCode.canceled) return; // User dismissed the sign-in sheet.
       _logger.e('Apple Sign-In authorization error', error: e, stackTrace: st);
