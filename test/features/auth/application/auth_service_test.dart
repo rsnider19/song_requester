@@ -128,6 +128,44 @@ void main() {
       });
     });
 
+    group('becomePerformer', () {
+      test('updates isPerformer then returns refreshed profile', () async {
+        const updatedProfile = UserProfile(
+          id: 'user-id',
+          isAnonymous: false,
+          isPerformer: true,
+          email: 'user@example.com',
+        );
+
+        when(
+          () => repository.updateIsPerformer(userId: 'user-id', isPerformer: true),
+        ).thenAnswer((_) async {});
+        when(
+          () => repository.getProfile('user-id', isAnonymous: false),
+        ).thenAnswer((_) async => updatedProfile);
+
+        final result = await service.becomePerformer('user-id');
+
+        expect(result.isPerformer, isTrue);
+        verify(() => repository.updateIsPerformer(userId: 'user-id', isPerformer: true)).called(1);
+        verify(() => repository.getProfile('user-id', isAnonymous: false)).called(1);
+      });
+
+      test('throws ProfileException when updateIsPerformer fails', () async {
+        when(
+          () => repository.updateIsPerformer(
+            userId: any(named: 'userId'),
+            isPerformer: any(named: 'isPerformer'),
+          ),
+        ).thenThrow(const ProfileException('update failed'));
+
+        await expectLater(
+          service.becomePerformer('user-id'),
+          throwsA(isA<ProfileException>()),
+        );
+      });
+    });
+
     group('signed-in profile', () {
       test('performer flag is preserved from repository', () async {
         const performer = UserProfile(

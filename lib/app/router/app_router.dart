@@ -8,6 +8,8 @@ import 'package:song_requester/features/auth/presentation/providers/auth_state_n
 import 'package:song_requester/features/auth/presentation/screens/sign_in_screen.dart';
 import 'package:song_requester/features/gigs/presentation/screens/gigs_screen.dart';
 import 'package:song_requester/features/home/presentation/screens/audience_home_screen.dart';
+import 'package:song_requester/features/performer_onboarding/presentation/screens/performer_onboarding_screen.dart';
+import 'package:song_requester/features/performer_onboarding/presentation/screens/performer_stripe_prompt_screen.dart';
 import 'package:song_requester/features/profile/presentation/screens/audience_profile_screen.dart';
 import 'package:song_requester/features/profile/presentation/screens/performer_profile_screen.dart';
 import 'package:song_requester/features/search/presentation/screens/search_screen.dart';
@@ -173,6 +175,30 @@ class SignInRoute extends GoRouteData with $SignInRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SignInScreen();
+}
+
+// ---------------------------------------------------------------------------
+// Performer onboarding (standalone — accessible to non-performers)
+// ---------------------------------------------------------------------------
+
+@TypedGoRoute<PerformerOnboardingRoute>(
+  path: '/performer-onboarding',
+  routes: [
+    TypedGoRoute<PerformerStripePromptRoute>(path: 'stripe'),
+  ],
+)
+class PerformerOnboardingRoute extends GoRouteData with $PerformerOnboardingRoute {
+  const PerformerOnboardingRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const PerformerOnboardingScreen();
+}
+
+class PerformerStripePromptRoute extends GoRouteData with $PerformerStripePromptRoute {
+  const PerformerStripePromptRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const PerformerStripePromptScreen();
 }
 
 // ---------------------------------------------------------------------------

@@ -35,4 +35,14 @@ class AuthStateNotifier extends _$AuthStateNotifier {
     ref.onDispose(() => unawaited(sub.cancel()));
     return initial;
   }
+
+  /// The current profile value. Prefer watching [authStateProvider] for
+  /// reactive updates; use this getter only in conjunction with the setter.
+  UserProfile? get profile => state;
+
+  /// Directly updates the in-memory profile without waiting for an auth event.
+  ///
+  /// Use this after a profile mutation (e.g. performer opt-in) to synchronously
+  /// reflect the change so router guards see the new state immediately.
+  set profile(UserProfile value) => state = value;
 }

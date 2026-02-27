@@ -32,6 +32,15 @@ class AuthService {
   /// Signs out. Anonymous session data is lost; the next open creates a new one.
   Future<void> signOut() => _repository.signOut();
 
+  /// Opts the given user into performer mode.
+  ///
+  /// Updates [UserProfile.isPerformer] to `true` in the database and returns the refreshed
+  /// [UserProfile]. Callers should handle [ProfileException].
+  Future<UserProfile> becomePerformer(String userId) async {
+    await _repository.updateIsPerformer(userId: userId, isPerformer: true);
+    return _repository.getProfile(userId, isAnonymous: false);
+  }
+
   // ---------------------------------------------------------------------------
 
   Future<UserProfile?> _toProfile(User? user) async {

@@ -193,5 +193,53 @@ void main() {
 
       expect(find.text('Sign out'), findsOneWidget);
     });
+
+    testWidgets('shows Become a Performer button for signed-in non-performer', (tester) async {
+      await tester.pumpApp(
+        const AudienceProfileScreen(),
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(
+              id: 'id',
+              isAnonymous: false,
+              isPerformer: false,
+              email: 'user@example.com',
+            ),
+          ),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+
+      expect(find.text('Become a Performer'), findsOneWidget);
+    });
+
+    testWidgets('hides Become a Performer button for guest (anonymous) user', (tester) async {
+      await tester.pumpApp(
+        const AudienceProfileScreen(),
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(id: 'id', isAnonymous: true, isPerformer: false),
+          ),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+
+      expect(find.text('Become a Performer'), findsNothing);
+    });
+
+    testWidgets('hides Become a Performer button for existing performer', (tester) async {
+      await tester.pumpApp(
+        const AudienceProfileScreen(),
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(id: 'id', isAnonymous: false, isPerformer: true),
+          ),
+          appModeProvider.overrideWithValue(AppMode.audience),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+
+      expect(find.text('Become a Performer'), findsNothing);
+    });
   });
 }

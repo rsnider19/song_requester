@@ -10,6 +10,7 @@ List<RouteBase> get $appRoutes => [
   $audienceShellRouteData,
   $performerShellRouteData,
   $signInRoute,
+  $performerOnboardingRoute,
 ];
 
 RouteBase get $audienceShellRouteData => StatefulShellRouteData.$route(
@@ -206,6 +207,59 @@ mixin $SignInRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/sign-in');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $performerOnboardingRoute => GoRouteData.$route(
+  path: '/performer-onboarding',
+  factory: $PerformerOnboardingRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: 'stripe',
+      factory: $PerformerStripePromptRoute._fromState,
+    ),
+  ],
+);
+
+mixin $PerformerOnboardingRoute on GoRouteData {
+  static PerformerOnboardingRoute _fromState(GoRouterState state) =>
+      const PerformerOnboardingRoute();
+
+  @override
+  String get location => GoRouteData.$location('/performer-onboarding');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PerformerStripePromptRoute on GoRouteData {
+  static PerformerStripePromptRoute _fromState(GoRouterState state) =>
+      const PerformerStripePromptRoute();
+
+  @override
+  String get location => GoRouteData.$location('/performer-onboarding/stripe');
 
   @override
   void go(BuildContext context) => context.go(location);
