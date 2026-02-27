@@ -130,8 +130,7 @@ void main() {
           (_) async => throw const SongLibraryException('Load failed'),
         );
 
-        final container = makeContainer();
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer()..listen(songLibraryStateProvider, (_, _) {});
 
         // Wait for the async load to complete.
         await Future<void>.delayed(Duration.zero);
@@ -146,8 +145,7 @@ void main() {
           (_) async => [_performerSong1],
         );
 
-        final container = makeContainer();
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer()..listen(songLibraryStateProvider, (_, _) {});
 
         // Wait for initial load.
         await Future<void>.delayed(Duration.zero);
@@ -165,8 +163,7 @@ void main() {
       });
 
       test('does nothing when profile is null', () async {
-        final container = makeContainer(profile: null);
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer(profile: null)..listen(songLibraryStateProvider, (_, _) {});
 
         await container.read(songLibraryStateProvider.notifier).refresh();
 
@@ -187,8 +184,7 @@ void main() {
           ),
         ).thenAnswer((_) async => false);
 
-        final container = makeContainer();
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer()..listen(songLibraryStateProvider, (_, _) {});
 
         // Wait for initial load.
         await Future<void>.delayed(Duration.zero);
@@ -208,8 +204,7 @@ void main() {
       });
 
       test('returns false when profile is null', () async {
-        final container = makeContainer(profile: null);
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer(profile: null)..listen(songLibraryStateProvider, (_, _) {});
 
         final result = await container.read(songLibraryStateProvider.notifier).addSong(_searchResult);
 
@@ -236,8 +231,7 @@ void main() {
           ),
         ).thenAnswer((_) async {});
 
-        final container = makeContainer();
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer()..listen(songLibraryStateProvider, (_, _) {});
 
         // Wait for initial load.
         await Future<void>.delayed(Duration.zero);
@@ -252,8 +246,7 @@ void main() {
       });
 
       test('does nothing when profile is null', () async {
-        final container = makeContainer(profile: null);
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer(profile: null)..listen(songLibraryStateProvider, (_, _) {});
 
         await container.read(songLibraryStateProvider.notifier).removeSong('song-1');
 
@@ -301,8 +294,7 @@ void main() {
           const SongLibraryException('Reorder failed'),
         );
 
-        final container = makeContainer();
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer()..listen(songLibraryStateProvider, (_, _) {});
 
         // Wait for initial load.
         await Future<void>.delayed(Duration.zero);
@@ -321,8 +313,7 @@ void main() {
           (_) => Completer<List<PerformerSong>>().future,
         );
 
-        final container = makeContainer();
-        container.listen(songLibraryStateProvider, (_, _) {});
+        final container = makeContainer()..listen(songLibraryStateProvider, (_, _) {});
 
         // State is AsyncLoading, so value is null.
         expect(container.read(songLibraryStateProvider), isA<AsyncLoading<List<PerformerSong>>>());

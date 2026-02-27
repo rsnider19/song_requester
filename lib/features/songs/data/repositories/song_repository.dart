@@ -131,7 +131,7 @@ class SongRepository {
           .eq('profile_id', profileId)
           .order('sort_order');
 
-      return rows.map((row) => PerformerSong.fromJson(row)).toList();
+      return rows.map(PerformerSong.fromJson).toList();
     } on Exception catch (e, st) {
       _logger.e('Failed to fetch song library', error: e, stackTrace: st);
       throw SongLibraryException('Could not load song library', e.toString());
