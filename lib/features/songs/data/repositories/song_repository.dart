@@ -139,6 +139,12 @@ class SongRepository {
   }
 
   /// Updates sort order for multiple performer_song rows in a batch.
+  ///
+  // TODO(perf): This sends N sequential UPDATE queries — one per row. It is
+  // not atomic (a partial failure leaves sort_order in an inconsistent state)
+  // and incurs N round trips. Replace with a single Postgres stored procedure
+  // that accepts a JSON array of {performer_song_id, sort_order} pairs and
+  // updates all rows in one transaction.
   Future<void> updateSortOrder(List<({String performerSongId, int sortOrder})> updates) async {
     try {
       for (final update in updates) {
