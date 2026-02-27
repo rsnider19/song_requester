@@ -48,4 +48,4 @@ final class LoggingServiceProvider
   }
 }
 
-String _$loggingServiceHash() => r'e0ef812ca71c0947b093edbf92b14f61d030c271';
+String _$loggingServiceHash() => r'274663172a68ff89c73a17f405edcfe33696f5ef';

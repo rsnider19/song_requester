@@ -76,6 +76,9 @@ LoggingService loggingService(Ref ref) {
       : kReleaseMode
       ? Level.warning
       : Level.info;
-  final logger = Logger(level: level, printer: PrettyPrinter());
+  final logger = Logger(
+    level: level,
+    printer: PrettyPrinter(methodCount: 0),
+  );
   return LoggingService(logger);
 }
