@@ -31,7 +31,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
       title: Row(
         children: [
           const Expanded(child: Text('Songs')),
-          if (libraryAsync.value?.isNotEmpty ?? false)
+          if ((libraryAsync.value?.isNotEmpty ?? false) && _filterQuery.isEmpty)
             ShadButton.ghost(
               size: ShadButtonSize.sm,
               onPressed: () => setState(() => _isEditMode = !_isEditMode),
@@ -74,13 +74,18 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                       padding: EdgeInsets.only(right: 8),
                       child: Icon(LucideIcons.search, size: 16),
                     ),
-                    onChanged: (value) => setState(() => _filterQuery = value),
+                    onChanged: (value) => setState(() {
+                      _filterQuery = value;
+                      if (value.isNotEmpty) _isEditMode = false;
+                    }),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    '${library.length} song${library.length == 1 ? '' : 's'}',
+                    _filterQuery.isNotEmpty
+                        ? '${filtered.length} of ${library.length} song${library.length == 1 ? '' : 's'}'
+                        : '${library.length} song${library.length == 1 ? '' : 's'}',
                     style: theme.textTheme.muted,
                   ),
                 ),
