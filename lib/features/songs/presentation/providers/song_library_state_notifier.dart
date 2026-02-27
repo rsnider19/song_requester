@@ -76,6 +76,7 @@ class SongLibraryStateNotifier extends _$SongLibraryStateNotifier {
     final current = state.value;
     if (current == null) return;
 
+    final previousList = current;
     final list = List<PerformerSong>.of(current);
     final item = list.removeAt(oldIndex);
     list.insert(newIndex, item);
@@ -83,9 +84,14 @@ class SongLibraryStateNotifier extends _$SongLibraryStateNotifier {
     // Optimistically update the UI.
     state = AsyncData(list);
 
-    await ref.read(songServiceProvider).reorderLibrary(list);
+    try {
+      await ref.read(songServiceProvider).reorderLibrary(list);
 
-    // Refresh to get the correct sort_order values from the DB.
-    await refresh();
+      // Refresh to get the correct sort_order values from the DB.
+      await refresh();
+    } on Exception {
+      // Rollback to the original list on failure.
+      state = AsyncData(previousList);
+    }
   }
 }
