@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withAuth } from "../_shared/auth.ts";
 
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
@@ -30,6 +31,7 @@ async function getAccessToken(): Promise<string> {
   const clientSecret = Deno.env.get("SPOTIFY_CLIENT_SECRET");
 
   if (!clientId || !clientSecret) {
+    console.log(Deno.env.toObject());
     throw new Error("Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET");
   }
 
@@ -153,11 +155,7 @@ async function handleArtistGenres(
 // Handler
 // ---------------------------------------------------------------------------
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: CORS_HEADERS });
-  }
-
+serve(withAuth(async (req, _claims) => {
   try {
     const body = await req.json();
 
@@ -196,4 +194,4 @@ serve(async (req) => {
       { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
     );
   }
-});
+}));
