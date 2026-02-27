@@ -82,14 +82,7 @@ class SongRepository {
           )
           .select()
           .single();
-      return Song(
-        songId: row['song_id'] as String,
-        title: row['title'] as String,
-        artist: row['artist'] as String,
-        spotifyTrackId: row['spotify_track_id'] as String,
-        albumArtUrl: row['album_art_url'] as String?,
-        genres: (row['genres'] as List<dynamic>?)?.cast<String>() ?? [],
-      );
+      return Song.fromJson(row);
     } on Exception catch (e, st) {
       _logger.e('Failed to upsert song', error: e, stackTrace: st);
       throw SongLibraryException('Could not save song', e.toString());
@@ -138,23 +131,7 @@ class SongRepository {
           .eq('profile_id', profileId)
           .order('sort_order');
 
-      return rows.map((row) {
-        final songData = row['song'] as Map<String, dynamic>;
-        return PerformerSong(
-          performerSongId: row['performer_song_id'] as String,
-          profileId: row['profile_id'] as String,
-          songId: row['song_id'] as String,
-          sortOrder: row['sort_order'] as int,
-          song: Song(
-            songId: songData['song_id'] as String,
-            title: songData['title'] as String,
-            artist: songData['artist'] as String,
-            spotifyTrackId: songData['spotify_track_id'] as String,
-            albumArtUrl: songData['album_art_url'] as String?,
-            genres: (songData['genres'] as List<dynamic>?)?.cast<String>() ?? [],
-          ),
-        );
-      }).toList();
+      return rows.map((row) => PerformerSong.fromJson(row)).toList();
     } on Exception catch (e, st) {
       _logger.e('Failed to fetch song library', error: e, stackTrace: st);
       throw SongLibraryException('Could not load song library', e.toString());
