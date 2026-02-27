@@ -108,6 +108,16 @@ await supabase
 final response = await supabase.rpc('function_name', params: {'param': value});
 ```
 
+### Supabase Edge Functions
+
+- **Response keys must be snake_case** to match the project's `build.yaml` `field_rename: snake` setting. Generated `fromJson()` methods expect snake_case keys — camelCase responses will silently produce null fields.
+  ```typescript
+  // ✅ CORRECT — matches build.yaml field_rename: snake
+  { spotify_track_id: track.id, album_art_url: track.album?.images?.[0]?.url }
+  // ❌ WRONG — fromJson() will not map these fields
+  { spotifyTrackId: track.id, albumArtUrl: track.album?.images?.[0]?.url }
+  ```
+
 ### Database Conventions
 
 - **Table names are singular**: `public.profile`, `public.gig`, never `public.profiles`
@@ -412,8 +422,8 @@ Use `shadcn_ui` (`package:shadcn_ui/shadcn_ui.dart`) as the primary UI system. M
 - Spacing: `Gap(n)` from the `gap` package in `Column`/`Row`/`Flex`. `SizedBox` for fixed dimensions only.
 - Borders: `Border.all(color: theme.colorScheme.border)` + `theme.radius`.
 
-#### Known Material exception
-- `CircularProgressIndicator` is acceptable for loading states. Import explicitly: `import 'package:flutter/material.dart' show CircularProgressIndicator;`. Never import all of `flutter/material.dart`.
+#### Known Material exceptions
+- `CircularProgressIndicator` is acceptable for loading states. `ReorderableListView` is acceptable for drag-to-reorder lists. Import explicitly: `import 'package:flutter/material.dart' show CircularProgressIndicator, ReorderableListView;`. Never import all of `flutter/material.dart`.
 - Always add `import 'package:flutter/widgets.dart';` alongside it to supply the core widget types.
 
 #### Custom widgets
