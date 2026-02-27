@@ -78,7 +78,7 @@ LoggingService loggingService(Ref ref) {
       : Level.info;
   final logger = Logger(
     level: level,
-    printer: PrettyPrinter(methodCount: 0),
+    printer: PrettyPrinter(methodCount: 0, colors: false),
   );
   return LoggingService(logger);
 }

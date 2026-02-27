@@ -66,7 +66,7 @@ Future<void> bootstrap(
       : kReleaseMode
       ? Level.warning
       : Level.info;
-  final logger = LoggingService(Logger(level: level, printer: PrettyPrinter(methodCount: 0)));
+  final logger = LoggingService(Logger(level: level, printer: PrettyPrinter(methodCount: 0, colors: false)));
 
   FlutterError.onError = (details) {
     logger.e('[FlutterError] ${details.exceptionAsString()}', stackTrace: details.stack);
@@ -80,22 +80,7 @@ Future<void> bootstrap(
     anonKey: env.supabaseAnonKey,
   );
 
-  final client = Supabase.instance.client;
-  logger.d('[Bootstrap] currentUser before sign-in: ${client.auth.currentUser?.id}');
-
-  if (client.auth.currentUser == null) {
-    try {
-      logger.i('[Bootstrap] Attempting anonymous sign-in...');
-      await client.auth.signInAnonymously();
-      logger.i('[Bootstrap] Anonymous sign-in succeeded. userId=${client.auth.currentUser?.id}');
-    } on Exception catch (e, st) {
-      logger.e('[Bootstrap] Anonymous sign-in FAILED', error: e, stackTrace: st);
-    }
-  } else {
-    logger.d('[Bootstrap] Existing session found, skipping sign-in.');
-  }
-
-  logger.d('[Bootstrap] currentUser after sign-in: ${client.auth.currentUser?.id}');
+  logger.d('[Bootstrap] currentUser: ${Supabase.instance.client.auth.currentUser?.id}');
 
   runApp(
     ProviderScope(
