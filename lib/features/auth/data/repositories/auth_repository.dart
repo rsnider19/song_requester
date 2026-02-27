@@ -1,4 +1,11 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:song_requester/app/providers/supabase_provider.dart';
 import 'package:song_requester/features/auth/domain/exceptions/auth_exception.dart';
 import 'package:song_requester/features/auth/domain/models/user_profile.dart';
@@ -8,10 +15,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 part 'auth_repository.g.dart';
 
 class AuthRepository {
-  AuthRepository(this._supabase, this._logger);
+  AuthRepository(
+    this._supabase,
+    this._logger, {
+    required String googleWebClientId,
+    String? googleIosClientId,
+  }) : _googleWebClientId = googleWebClientId,
+       _googleIosClientId = googleIosClientId;
 
   final SupabaseClient _supabase;
   final LoggingService _logger;
+  final String _googleWebClientId;
+  final String? _googleIosClientId;
 
   /// Returns the currently authenticated [User], or null if no session exists.
   User? get currentUser => _supabase.auth.currentUser;
@@ -29,18 +44,77 @@ class AuthRepository {
     }
   }
 
-  /// Signs in with Google OAuth.
+  /// Signs in with Google using the native SDK flow.
   ///
-  // TODO(oauth): Replace stub with real OAuth once credentials are configured.
+  /// Calls `GoogleSignIn.signIn` to retrieve an ID token, then exchanges it
+  /// with Supabase via `signInWithIdToken`. Returns silently if the user
+  /// cancels the sign-in sheet.
   Future<void> signInWithGoogle() async {
-    throw const SignInException('Google Sign-In is not yet implemented');
+    try {
+      final googleSignIn = GoogleSignIn(
+        clientId: _googleIosClientId,
+        serverClientId: _googleWebClientId,
+      );
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // User dismissed the sign-in sheet.
+
+      final googleAuth = await googleUser.authentication;
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (accessToken == null) throw const SignInException('Google Sign-In failed: no access token received');
+      if (idToken == null) throw const SignInException('Google Sign-In failed: no ID token received');
+
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+    } on SignInException {
+      rethrow;
+    } catch (e, st) {
+      _logger.e('Failed to sign in with Google', error: e, stackTrace: st);
+      throw SignInException('Google Sign-In failed', e.toString());
+    }
   }
 
-  /// Signs in with Apple OAuth.
+  /// Signs in with Apple using the native SDK flow (iOS/macOS only).
   ///
-  // TODO(oauth): Replace stub with real OAuth once credentials are configured.
+  /// Generates a PKCE nonce, calls [SignInWithApple.getAppleIDCredential],
+  /// then exchanges the identity token with Supabase. Returns silently if
+  /// the user cancels.
   Future<void> signInWithApple() async {
-    throw const SignInException('Apple Sign-In is not yet implemented');
+    try {
+      final rawNonce = _generateNonce();
+      final hashedNonce = _sha256(rawNonce);
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+
+      final idToken = credential.identityToken;
+      if (idToken == null) throw const SignInException('Apple Sign-In failed: no identity token received');
+
+      await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
+    } on SignInWithAppleAuthorizationException catch (e, st) {
+      if (e.code == AuthorizationErrorCode.canceled) return; // User dismissed the sign-in sheet.
+      _logger.e('Apple Sign-In authorization error', error: e, stackTrace: st);
+      throw SignInException('Apple Sign-In failed', e.toString());
+    } on SignInException {
+      rethrow;
+    } catch (e, st) {
+      _logger.e('Failed to sign in with Apple', error: e, stackTrace: st);
+      throw SignInException('Apple Sign-In failed', e.toString());
+    }
   }
 
   /// Signs the current user out.
@@ -88,10 +162,29 @@ class AuthRepository {
       throw ProfileException('Could not update profile', e.toString());
     }
   }
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  /// Generates a cryptographically random nonce string.
+  static String _generateNonce([int length = 32]) {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+  }
+
+  /// Returns the SHA-256 hex digest of [input].
+  static String _sha256(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
 }
 
 @Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) => AuthRepository(
   ref.watch(supabaseProvider),
   ref.watch(loggingServiceProvider),
+  googleWebClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '',
+  googleIosClientId: dotenv.env['GOOGLE_IOS_CLIENT_ID'],
 );

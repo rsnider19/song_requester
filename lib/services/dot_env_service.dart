@@ -14,6 +14,8 @@ final class DotEnvService {
 
   String get supabaseUrl => _require('SUPABASE_URL');
   String get supabaseAnonKey => _require('SUPABASE_ANON_KEY');
+  String get googleWebClientId => _require('GOOGLE_WEB_CLIENT_ID');
+  String? get googleIosClientId => dotenv.env['GOOGLE_IOS_CLIENT_ID'];
 
   String _require(String key) {
     final value = dotenv.env[key];

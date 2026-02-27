@@ -29,7 +29,11 @@ void main() {
     supabase = _MockSupabaseClient();
     auth = _MockGoTrueClient();
     logger = _MockLoggingService();
-    repository = AuthRepository(supabase, logger);
+    repository = AuthRepository(
+      supabase,
+      logger,
+      googleWebClientId: 'test-web-client-id',
+    );
     when(() => supabase.auth).thenReturn(auth);
   });
 
@@ -59,23 +63,9 @@ void main() {
       });
     });
 
-    group('signInWithGoogle', () {
-      test('throws SignInException (stub)', () async {
-        await expectLater(
-          repository.signInWithGoogle(),
-          throwsA(isA<SignInException>()),
-        );
-      });
-    });
-
-    group('signInWithApple', () {
-      test('throws SignInException (stub)', () async {
-        await expectLater(
-          repository.signInWithApple(),
-          throwsA(isA<SignInException>()),
-        );
-      });
-    });
+    // signInWithGoogle and signInWithApple use native SDK sheets and require
+    // integration testing on a real device. Unit tests for those flows are
+    // omitted here intentionally.
 
     group('signOut', () {
       test('calls supabase.auth.signOut', () async {
