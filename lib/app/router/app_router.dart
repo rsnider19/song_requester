@@ -13,6 +13,7 @@ import 'package:song_requester/features/performer_onboarding/presentation/screen
 import 'package:song_requester/features/profile/presentation/screens/audience_profile_screen.dart';
 import 'package:song_requester/features/profile/presentation/screens/performer_profile_screen.dart';
 import 'package:song_requester/features/search/presentation/screens/search_screen.dart';
+import 'package:song_requester/features/songs/presentation/screens/add_song_screen.dart';
 import 'package:song_requester/features/songs/presentation/screens/songs_screen.dart';
 import 'package:song_requester/widgets/app_shell_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -105,7 +106,12 @@ class AudienceProfileRoute extends GoRouteData with $AudienceProfileRoute {
     ),
     TypedStatefulShellBranch<SongsBranchData>(
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<SongsRoute>(path: '/performer/songs'),
+        TypedGoRoute<SongsRoute>(
+          path: '/performer/songs',
+          routes: [
+            TypedGoRoute<AddSongRoute>(path: 'add'),
+          ],
+        ),
       ],
     ),
     TypedStatefulShellBranch<PerformerProfileBranchData>(
@@ -152,6 +158,13 @@ class SongsRoute extends GoRouteData with $SongsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const SongsScreen();
+}
+
+class AddSongRoute extends GoRouteData with $AddSongRoute {
+  const AddSongRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const AddSongScreen();
 }
 
 class PerformerProfileBranchData extends StatefulShellBranchData {

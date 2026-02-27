@@ -119,6 +119,9 @@ RouteBase get $performerShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/performer/songs',
           factory: $SongsRoute._fromState,
+          routes: [
+            GoRouteData.$route(path: 'add', factory: $AddSongRoute._fromState),
+          ],
         ),
       ],
     ),
@@ -163,6 +166,26 @@ mixin $SongsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/performer/songs');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AddSongRoute on GoRouteData {
+  static AddSongRoute _fromState(GoRouterState state) => const AddSongRoute();
+
+  @override
+  String get location => GoRouteData.$location('/performer/songs/add');
 
   @override
   void go(BuildContext context) => context.go(location);
