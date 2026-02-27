@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart' show Scaffold;
 import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -28,15 +27,20 @@ class AppShellScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: _AppBottomNavBar(
-        tabs: tabs,
-        selectedIndex: navigationShell.currentIndex,
-        onTabSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
+    return ColoredBox(
+      color: ShadTheme.of(context).colorScheme.background,
+      child: Column(
+        children: [
+          Expanded(child: navigationShell),
+          _AppBottomNavBar(
+            tabs: tabs,
+            selectedIndex: navigationShell.currentIndex,
+            onTabSelected: (index) => navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            ),
+          ),
+        ],
       ),
     );
   }

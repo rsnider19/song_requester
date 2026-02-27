@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-/// A custom scaffold that wraps [Scaffold] and [AppBar] with app-level styling.
+/// App-level scaffold — a pure shadcn alternative to Material's Scaffold.
 ///
-/// Use this instead of [Scaffold] directly in all feature screens.
-/// If a screen needs a top navigation bar, pass a [title] widget.
+/// Provides an optional top app bar and an optional floating action button
+/// overlay. Screens are responsible for their own [SafeArea] in [body].
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
     required this.body,
@@ -19,22 +19,56 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shadTheme = ShadTheme.of(context);
-    return Scaffold(
-      backgroundColor: shadTheme.colorScheme.background,
-      appBar: title != null
-          ? AppBar(
-              title: DefaultTextStyle(
-                style: TextStyle(color: shadTheme.colorScheme.foreground),
-                child: title!,
-              ),
-              backgroundColor: shadTheme.colorScheme.card,
-              iconTheme: IconThemeData(color: shadTheme.colorScheme.foreground),
-              elevation: 0,
-            )
-          : null,
-      body: body,
-      floatingActionButton: floatingActionButton,
+    final theme = ShadTheme.of(context);
+    return ColoredBox(
+      color: theme.colorScheme.background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) _AppBar(title: title!, theme: theme),
+          Expanded(
+            child: floatingActionButton != null
+                ? Stack(
+                    children: [
+                      body,
+                      Positioned(
+                        right: 16,
+                        bottom: 16,
+                        child: floatingActionButton!,
+                      ),
+                    ],
+                  )
+                : body,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppBar extends StatelessWidget {
+  const _AppBar({required this.title, required this.theme});
+
+  final Widget title;
+  final ShadThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.card,
+        border: Border(bottom: BorderSide(color: theme.colorScheme.border)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: DefaultTextStyle(
+            style: theme.textTheme.h4.copyWith(color: theme.colorScheme.foreground),
+            child: title,
+          ),
+        ),
+      ),
     );
   }
 }
