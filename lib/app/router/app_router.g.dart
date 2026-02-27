@@ -6,16 +6,183 @@ part of 'app_router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$counterRoute, $signInRoute];
+List<RouteBase> get $appRoutes => [
+  $audienceShellRouteData,
+  $performerShellRouteData,
+  $signInRoute,
+];
 
-RouteBase get $counterRoute =>
-    GoRouteData.$route(path: '/', factory: $CounterRoute._fromState);
+RouteBase get $audienceShellRouteData => StatefulShellRouteData.$route(
+  factory: $AudienceShellRouteDataExtension._fromState,
+  branches: [
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(path: '/home', factory: $HomeRoute._fromState),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(path: '/search', factory: $SearchRoute._fromState),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/profile',
+          factory: $AudienceProfileRoute._fromState,
+        ),
+      ],
+    ),
+  ],
+);
 
-mixin $CounterRoute on GoRouteData {
-  static CounterRoute _fromState(GoRouterState state) => const CounterRoute();
+extension $AudienceShellRouteDataExtension on AudienceShellRouteData {
+  static AudienceShellRouteData _fromState(GoRouterState state) =>
+      const AudienceShellRouteData();
+}
+
+mixin $HomeRoute on GoRouteData {
+  static HomeRoute _fromState(GoRouterState state) => const HomeRoute();
 
   @override
-  String get location => GoRouteData.$location('/');
+  String get location => GoRouteData.$location('/home');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SearchRoute on GoRouteData {
+  static SearchRoute _fromState(GoRouterState state) => const SearchRoute();
+
+  @override
+  String get location => GoRouteData.$location('/search');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AudienceProfileRoute on GoRouteData {
+  static AudienceProfileRoute _fromState(GoRouterState state) =>
+      const AudienceProfileRoute();
+
+  @override
+  String get location => GoRouteData.$location('/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $performerShellRouteData => StatefulShellRouteData.$route(
+  factory: $PerformerShellRouteDataExtension._fromState,
+  branches: [
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/performer/gigs',
+          factory: $GigsRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/performer/songs',
+          factory: $SongsRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/performer/profile',
+          factory: $PerformerProfileRoute._fromState,
+        ),
+      ],
+    ),
+  ],
+);
+
+extension $PerformerShellRouteDataExtension on PerformerShellRouteData {
+  static PerformerShellRouteData _fromState(GoRouterState state) =>
+      const PerformerShellRouteData();
+}
+
+mixin $GigsRoute on GoRouteData {
+  static GigsRoute _fromState(GoRouterState state) => const GigsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/performer/gigs');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SongsRoute on GoRouteData {
+  static SongsRoute _fromState(GoRouterState state) => const SongsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/performer/songs');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PerformerProfileRoute on GoRouteData {
+  static PerformerProfileRoute _fromState(GoRouterState state) =>
+      const PerformerProfileRoute();
+
+  @override
+  String get location => GoRouteData.$location('/performer/profile');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -100,4 +267,4 @@ final class GoRouterProvider
   }
 }
 
-String _$goRouterHash() => r'6dd6ac54f48973863b10709b70487fd585dc43b5';
+String _$goRouterHash() => r'fb3570a23396b20f0510c8556c924f805721bb90';
