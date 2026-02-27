@@ -11,26 +11,7 @@
 
 ## In Progress
 
-### Item 4: Song Management (Milestone 2)
-
-**Summary:** Implement the performer song library. Integrate Spotify API for song search (client credentials flow), store title, artist, and Spotify track ID. Support manual fallback entry. Genre derived from Spotify metadata.
-
-**Spec:** `docs/specs/04-song-management.md`
-
-**Key files:**
-
-- `lib/features/songs/` (new feature directory)
-- `supabase/schema.ts` (songs table)
-
-**Exit criteria:**
-
-- [ ] `Song` Freezed model (id, title, artist, spotifyTrackId, genres)
-- [ ] Spotify search by title or artist using client credentials flow
-- [ ] Manual song entry fallback (title + artist only)
-- [ ] Add song to library, remove song from library
-- [ ] Song library list UI on Performer Profile page
-- [ ] Removing a song does not affect past gig request data
-- [ ] Unit tests for song repository and service
+(none)
 
 ---
 
@@ -279,6 +260,12 @@
 ---
 
 ## Done
+
+### Item 4: Song Management (Milestone 2)
+
+**Summary:** Implemented performer song library with Spotify API integration. Normalized `song` and `performer_song` tables, Spotify search edge function (client credentials flow with token caching), full CRUD with drag-to-reorder, debounced search-as-you-type, album art display, duplicate detection, and soft limit warning at 500 songs. 127 tests covering repository, service, notifier, and widget layers.
+
+---
 
 ### Item 3: Performer Opt-in Flow (Milestone 1)
 
