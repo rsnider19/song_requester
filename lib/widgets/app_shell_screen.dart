@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -26,18 +27,18 @@ class AppShellScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shadTheme = ShadTheme.of(context);
-    return Scaffold(
-      backgroundColor: shadTheme.colorScheme.background,
-      body: navigationShell,
-      bottomNavigationBar: _AppBottomNavBar(
-        tabs: tabs,
-        selectedIndex: navigationShell.currentIndex,
-        onTabSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
+    return Column(
+      children: [
+        Expanded(child: navigationShell),
+        _AppBottomNavBar(
+          tabs: tabs,
+          selectedIndex: navigationShell.currentIndex,
+          onTabSelected: (index) => navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -108,7 +109,7 @@ class _NavBarItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(tab.icon, size: 22, color: color),
-          const SizedBox(height: 4),
+          const Gap(4),
           Text(
             tab.label,
             style: shadTheme.textTheme.small.copyWith(color: color, fontSize: 11),

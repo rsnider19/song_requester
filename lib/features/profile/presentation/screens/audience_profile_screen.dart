@@ -14,6 +14,7 @@ class AudienceProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(authStateProvider);
     final isPerformer = profile?.isPerformer ?? false;
+    final mode = ref.watch(appModeProvider);
 
     return AppScaffold(
       title: const Text('Profile'),
@@ -37,8 +38,9 @@ class AudienceProfileScreen extends ConsumerWidget {
                       style: ShadTheme.of(context).textTheme.p,
                     ),
                     ShadSwitch(
-                      value: false,
-                      onChanged: (_) => ref.read(appModeProvider.notifier).mode = AppMode.performer,
+                      value: mode == AppMode.performer,
+                      onChanged: (value) =>
+                          ref.read(appModeProvider.notifier).mode = value ? AppMode.performer : AppMode.audience,
                     ),
                   ],
                 ),

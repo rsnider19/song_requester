@@ -190,11 +190,16 @@ GoRouter goRouter(Ref ref) {
     initialLocation: '/home',
     refreshListenable: refreshListenable,
     redirect: (context, state) {
+      // Use ref.read — redirect is invoked reactively via refreshListenable/listen;
+      // watching here would cause rebuild loops.
       final profile = ref.read(authStateProvider);
       final mode = ref.read(appModeProvider);
       final isPerformer = profile?.isPerformer ?? false;
       final loc = state.matchedLocation;
       final isPerformerRoute = loc.startsWith('/performer');
+
+      // Guard: unauthenticated users must sign in first.
+      if (profile == null && loc != '/sign-in') return '/sign-in';
 
       // Guard: non-performers cannot access performer routes.
       if (isPerformerRoute && !isPerformer) return '/home';

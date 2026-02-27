@@ -15,10 +15,14 @@ enum AppMode { audience, performer }
 class AppModeNotifier extends _$AppModeNotifier {
   @override
   AppMode build() {
-    final profile = ref.read(authStateProvider);
+    // Watch so the notifier rebuilds when auth state changes (e.g. sign-out then
+    // sign-in within the same session), re-seeding the correct default mode.
+    final profile = ref.watch(authStateProvider);
     return (profile?.isPerformer ?? false) ? AppMode.performer : AppMode.audience;
   }
 
+  // The mode getter/setter provide a semantic API (mode vs state) and satisfy
+  // the lint requirement to pair a setter with a getter on the same class.
   AppMode get mode => state;
   set mode(AppMode value) => state = value;
 }

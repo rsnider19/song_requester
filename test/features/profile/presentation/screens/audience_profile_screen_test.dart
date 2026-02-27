@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -89,6 +90,96 @@ void main() {
 
       expect(find.byType(ShadSwitch), findsOneWidget);
       expect(find.text('Performer mode'), findsOneWidget);
+    });
+
+    testWidgets('mode toggle reflects audience mode (switch off)', (tester) async {
+      await tester.pumpApp(
+        const AudienceProfileScreen(),
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(id: 'id', isAnonymous: false, isPerformer: true),
+          ),
+          appModeProvider.overrideWithValue(AppMode.audience),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+
+      final toggle = tester.widget<ShadSwitch>(find.byType(ShadSwitch));
+      expect(toggle.value, isFalse);
+    });
+
+    testWidgets('mode toggle reflects performer mode (switch on)', (tester) async {
+      await tester.pumpApp(
+        const AudienceProfileScreen(),
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(id: 'id', isAnonymous: false, isPerformer: true),
+          ),
+          appModeProvider.overrideWithValue(AppMode.performer),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+
+      final toggle = tester.widget<ShadSwitch>(find.byType(ShadSwitch));
+      expect(toggle.value, isTrue);
+    });
+
+    testWidgets('tapping mode toggle off sets mode to audience', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(id: 'id', isAnonymous: false, isPerformer: true),
+          ),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Seed the notifier into performer mode.
+      container.read(appModeProvider.notifier).mode = AppMode.performer;
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const ShadApp(home: AudienceProfileScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap the switch to toggle off (performer → audience).
+      await tester.tap(find.byType(ShadSwitch));
+      await tester.pump();
+
+      expect(container.read(appModeProvider), AppMode.audience);
+    });
+
+    testWidgets('tapping mode toggle on sets mode to performer', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          authStateProvider.overrideWithValue(
+            const UserProfile(id: 'id', isAnonymous: false, isPerformer: true),
+          ),
+          authServiceProvider.overrideWithValue(authService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Notifier starts in audience mode (default for performer who hasn't switched).
+      container.read(appModeProvider.notifier).mode = AppMode.audience;
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const ShadApp(home: AudienceProfileScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap the switch to toggle on (audience → performer).
+      await tester.tap(find.byType(ShadSwitch));
+      await tester.pump();
+
+      expect(container.read(appModeProvider), AppMode.performer);
     });
 
     testWidgets('shows sign-out button', (tester) async {

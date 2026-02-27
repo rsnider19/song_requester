@@ -14,8 +14,9 @@ void main() {
       // Override goRouterProvider to avoid Supabase.instance initialization
       // in tests (bootstrap handles that at runtime).
       final testRouter = GoRouter(
+        initialLocation: '/home',
         routes: [
-          GoRoute(path: '/', builder: (_, _) => const SizedBox()),
+          GoRoute(path: '/home', builder: (_, _) => const SizedBox()),
         ],
       );
 

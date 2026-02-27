@@ -56,7 +56,7 @@ final class AppModeNotifierProvider
   }
 }
 
-String _$appModeNotifierHash() => r'792dd9b3eaf576a73caf58a810d0d29d24516bc0';
+String _$appModeNotifierHash() => r'721d3a4d759ff928ac671174fddc9cde60257e13';
 
 /// Tracks the active app mode (Audience or Performer).
 ///

@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:song_requester/app/providers/app_mode_notifier.dart';
 import 'package:song_requester/features/auth/application/auth_service.dart';
 import 'package:song_requester/features/profile/presentation/screens/performer_profile_screen.dart';
 
@@ -45,6 +47,27 @@ void main() {
 
       final toggle = tester.widget<ShadSwitch>(find.byType(ShadSwitch));
       expect(toggle.value, isTrue);
+    });
+
+    testWidgets('tapping mode toggle sets mode to audience', (tester) async {
+      final container = ProviderContainer(
+        overrides: [authServiceProvider.overrideWithValue(authService)],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const ShadApp(home: PerformerProfileScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap the switch to toggle off (performer → audience).
+      await tester.tap(find.byType(ShadSwitch));
+      await tester.pump();
+
+      expect(container.read(appModeProvider), AppMode.audience);
     });
 
     testWidgets('shows sign-out button', (tester) async {
