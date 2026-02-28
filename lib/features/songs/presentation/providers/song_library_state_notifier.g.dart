@@ -48,7 +48,7 @@ final class SongLibraryStateNotifierProvider
 }
 
 String _$songLibraryStateNotifierHash() =>
-    r'e0555e1e61f820b75ddd7cd1db1823b5144cf5f1';
+    r'43b93f728257370e0ba36c40a93327bbb1495ea2';
 
 abstract class _$SongLibraryStateNotifier
     extends $Notifier<AsyncValue<List<PerformerSong>>> {

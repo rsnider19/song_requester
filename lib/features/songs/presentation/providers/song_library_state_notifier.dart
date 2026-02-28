@@ -81,14 +81,18 @@ class SongLibraryStateNotifier extends _$SongLibraryStateNotifier {
     final item = list.removeAt(oldIndex);
     list.insert(newIndex, item);
 
+    // Build an optimistic list with sortOrder values matching new positions.
+    final updatedList = [
+      for (var i = 0; i < list.length; i++) list[i].copyWith(sortOrder: i),
+    ];
+
     // Optimistically update the UI.
-    state = AsyncData(list);
+    state = AsyncData(updatedList);
 
     try {
+      // Pass the rearranged list with OLD sortOrder values so reorderLibrary
+      // can diff which rows actually changed.
       await ref.read(songServiceProvider).reorderLibrary(list);
-
-      // Refresh to get the correct sort_order values from the DB.
-      await refresh();
     } on Exception {
       // Rollback to the original list on failure.
       state = AsyncData(previousList);
