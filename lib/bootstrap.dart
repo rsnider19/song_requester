@@ -20,25 +20,93 @@ final class AppProviderObserver extends ProviderObserver {
     Object? newValue,
   ) {
     final name = context.provider.name ?? context.provider.runtimeType.toString();
-    _logger.d('[Provider] $name\n  prev: ${_formatValue(previousValue)}\n  next: ${_formatValue(newValue)}');
+    _logger.d('[Provider] $name\n  prev: ${_formatLine(previousValue)}\n  next: ${_formatLine(newValue)}');
   }
 
   /// Formats a provider value for readability.
   ///
-  /// Objects matching `ClassName(field: value, ...)` are expanded to one field
-  /// per line. Primitives and nulls are returned as-is.
-  static String _formatValue(Object? value) {
+  /// Objects matching `ClassName(...)`, `[...]`, or `{...}` are expanded
+  /// with proper nesting support. Primitives and nulls are returned as-is.
+  static String _formatLine(Object? value, [int depth = 1]) {
     if (value == null) return 'null';
-    final str = value.toString();
-    final match = RegExp(r'^([A-Z]\w*)\((.+)\)$', dotAll: true).firstMatch(str);
-    if (match == null) return str;
-    final className = match.group(1)!;
-    final body = match.group(2)!;
-    // Split at commas followed by whitespace and a named field (word:),
-    // to avoid splitting inside nested values like lists or nested objects.
-    final fields = body.split(RegExp(r',\s+(?=\w+:)'));
-    if (fields.length <= 1) return str;
-    return '$className(\n${fields.map((f) => '    $f').join(',\n')}\n  )';
+    final str = value.toString().trim();
+
+    String? prefix;
+    String? suffix;
+    String content;
+
+    final classMatch = RegExp(r'^([A-Z][\w<> ,.]*)\((.*)\)$', dotAll: true).firstMatch(str);
+    if (classMatch != null) {
+      prefix = '${classMatch.group(1)}(';
+      suffix = ')';
+      content = classMatch.group(2)!;
+    } else if (str.startsWith('[') && str.endsWith(']')) {
+      prefix = '[';
+      suffix = ']';
+      content = str.substring(1, str.length - 1);
+    } else if (str.startsWith('{') && str.endsWith('}')) {
+      prefix = '{';
+      suffix = '}';
+      content = str.substring(1, str.length - 1);
+    } else {
+      return str;
+    }
+
+    if (content.isEmpty) return '$prefix$suffix';
+
+    // Split content into top-level items, respecting nested boundaries
+    final items = <String>[];
+    var current = StringBuffer();
+    var nestingDepth = 0;
+    for (var i = 0; i < content.length; i++) {
+      final char = content[i];
+      if (char == '(' || char == '[' || char == '{') nestingDepth++;
+      if (char == ')' || char == ']' || char == '}') nestingDepth--;
+
+      if (nestingDepth == 0 && char == ',') {
+        items.add(current.toString().trim());
+        current = StringBuffer();
+        while (i + 1 < content.length && content[i + 1] == ' ') {
+          i++;
+        }
+      } else {
+        current.write(char);
+      }
+    }
+    if (current.isNotEmpty) items.add(current.toString().trim());
+
+    if (items.isEmpty) return '$prefix$suffix';
+
+    // Heuristic: don't expand if it's a single simple item
+    if (items.length <= 1 && !items.any((item) => item.contains('(') || item.contains('[') || item.contains('{'))) {
+      return '$prefix${items.join(', ')}$suffix';
+    }
+
+    final indent = ' ' * ((depth + 1) * 2);
+    final backIndent = ' ' * (depth * 2);
+
+    final formattedItems = items
+        .map((item) {
+          // Handle key: value pairs in classes or maps
+          final colonIndex = item.indexOf(': ');
+          if (colonIndex != -1) {
+            // Ensure the colon is at the top level of this item
+            var b = 0;
+            for (var j = 0; j < colonIndex; j++) {
+              if ('([{'.contains(item[j])) b++;
+              if (')]}'.contains(item[j])) b--;
+            }
+            if (b == 0) {
+              final key = item.substring(0, colonIndex);
+              final val = item.substring(colonIndex + 2);
+              return '$indent$key: ${_formatLine(val, depth + 1)}';
+            }
+          }
+          return '$indent${_formatLine(item, depth + 1)}';
+        })
+        .join(',\n');
+
+    return '$prefix\n$formattedItems\n$backIndent$suffix';
   }
 
   @override
