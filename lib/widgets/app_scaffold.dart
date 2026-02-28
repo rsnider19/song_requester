@@ -27,23 +27,43 @@ class AppScaffold extends StatelessWidget {
         children: [
           if (title != null) _AppBar(title: title!, theme: theme),
           Expanded(
-            child: floatingActionButton != null
-                ? Stack(
-                    children: [
-                      body,
-                      Positioned(
-                        right: 16,
-                        bottom: 16,
-                        child: floatingActionButton!,
-                      ),
-                    ],
-                  )
-                : body,
+            child: _maybeRemoveTopPadding(
+              context: context,
+              removeTop: title != null,
+              child: floatingActionButton != null
+                  ? Stack(
+                      children: [
+                        body,
+                        Positioned(
+                          right: 16,
+                          bottom: 16,
+                          child: floatingActionButton!,
+                        ),
+                      ],
+                    )
+                  : body,
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+/// When the app bar is present it already consumes the top safe-area inset.
+/// Strip that inset from [MediaQuery] so descendant [SafeArea] widgets in the
+/// body don't double-apply it.
+Widget _maybeRemoveTopPadding({
+  required BuildContext context,
+  required bool removeTop,
+  required Widget child,
+}) {
+  if (!removeTop) return child;
+  return MediaQuery.removePadding(
+    context: context,
+    removeTop: true,
+    child: child,
+  );
 }
 
 class _AppBar extends StatelessWidget {
